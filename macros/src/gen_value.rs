@@ -1,11 +1,11 @@
-use {crate::utils::DomainDTOAst,
+use {crate::utils::DomainDefAst,
      convert_case::{Case,
                     Casing},
      proc_macro2::TokenStream,
      quote::{format_ident,
              quote}};
 
-pub fn generate_values(ast: &DomainDTOAst) -> TokenStream {
+pub fn generate_values(ast: &DomainDefAst) -> TokenStream {
   let recurse = ast.fields_named
                    .named
                    .iter()

@@ -1,6 +1,8 @@
-use crcnt_ddd_macros::DomainModel;
+use {crcnt_ddd_macros::DomainModel,
+     serde::{Deserialize,
+             Serialize}};
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CreateAt(pub u64);
 
 #[allow(dead_code)]

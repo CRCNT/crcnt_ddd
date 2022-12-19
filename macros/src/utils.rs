@@ -8,11 +8,11 @@ use {proc_macro2::Ident,
            PathArguments,
            Type}};
 
-pub struct DomainDTOAst {
+pub struct DomainDefAst {
   pub root_name_ident: Ident,
   pub fields_named:    FieldsNamed,
 }
-impl DomainDTOAst {
+impl DomainDefAst {
   pub fn new(derive_input: DeriveInput) -> Self {
     let name = derive_input.ident.clone();
     let name_string = name.to_string();
@@ -25,7 +25,7 @@ impl DomainDTOAst {
       | Data::Struct(data) => match data.fields {
         | Fields::Named(ref fields) => {
           let fields_named = fields.clone();
-          DomainDTOAst { root_name_ident,
+          DomainDefAst { root_name_ident,
                          fields_named }
         }
         | _ => panic!("DomainDTO should be fields-named"),

@@ -19,4 +19,11 @@ fn test_macro() {
 
   println!("id = {}", id);
   println!("name = {}", name);
+
+  let dto = CustomerInfoDTO { id,
+                              name,
+                              description: None,
+                              create_at: CreateAt(0),
+                              update_at: 0 };
+  println!("{}", dto.unsafe_to_json());
 }

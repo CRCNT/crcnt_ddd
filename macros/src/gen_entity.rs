@@ -1,11 +1,11 @@
-use {crate::utils::DomainDTOAst,
+use {crate::utils::DomainDefAst,
      convert_case::{Case,
                     Casing},
      proc_macro2::TokenStream,
      quote::{format_ident,
              quote}};
 
-pub fn gen_entity(ast: &DomainDTOAst) -> TokenStream {
+pub fn gen_entity(ast: &DomainDefAst) -> TokenStream {
   let entity_name_ident = format_ident!("{}Entity", ast.root_name_ident);
   let entity_builder_name_ident = format_ident!("{}Builder", entity_name_ident);
   let entity_fields = ast.fields_named
