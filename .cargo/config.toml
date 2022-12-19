@@ -1,0 +1,10 @@
+[alias]
+b = "build"
+c = "check"
+t = "test"
+r = "run"
+rr = "run --release"
+
+[build]
+target-dir = "/opt/rust_targets"
+rustc-wrapper = "sccache"
