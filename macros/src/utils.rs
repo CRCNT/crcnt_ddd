@@ -16,10 +16,10 @@ impl DomainDTOAst {
   pub fn new(derive_input: DeriveInput) -> Self {
     let name = derive_input.ident.clone();
     let name_string = name.to_string();
-    if !name_string.ends_with("DTO") {
-      panic!("DomainDef should ended with DTO");
+    if !name_string.ends_with("__") || !name_string.starts_with("__") {
+      panic!("DomainDef should started and ended with __");
     }
-    let root_name = &name_string[.. (name_string.len() - 3)];
+    let root_name = &name_string[2 .. (name_string.len() - 2)];
     let root_name_ident = format_ident!("{}", root_name);
     match derive_input.data {
       | Data::Struct(data) => match data.fields {

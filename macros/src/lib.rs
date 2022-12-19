@@ -7,7 +7,7 @@ mod gen_entity;
 mod gen_value;
 mod utils;
 
-#[proc_macro_derive(DomainEntityAndValues)]
+#[proc_macro_derive(DomainModel)]
 pub fn domain_def(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
   let derive_input = parse_macro_input!(input as DeriveInput);
 

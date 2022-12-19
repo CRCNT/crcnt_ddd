@@ -21,6 +21,17 @@ pub fn generate_values(ast: &DomainDTOAst) -> TokenStream {
                          pub fn new<T: Into<#typ>>(x: T) -> Self {
                            Self(x.into())
                          }
+                         pub fn inner(&self) -> &#typ {
+                           &self.0
+                         }
+                         pub fn into_inner(self) -> #typ {
+                           self.0
+                         }
+                       }
+                       impl <T: Into<#typ>> From<T> for #value_name {
+                         fn from(x: T) -> Self {
+                           Self(x.into())
+                         }
                        }
                      };
                      ts

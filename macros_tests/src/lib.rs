@@ -1,23 +1,22 @@
-use crcnt_ddd_macros::DomainEntityAndValues;
+mod domain;
 
-#[allow(dead_code)]
-#[derive(DomainEntityAndValues, Debug, Clone)]
-struct CustomerDTO {
-  name:    String,
-  my_name: Option<Result<String, String>>,
-}
+use domain::*;
 
 #[test]
 fn test_macro() {
-  let customer_name = CustomerName::new("Zenas");
-  let customer_my_name = CustomerMyName(Ok("Zenas".to_string()));
-  println!("{:?}", customer_name);
-  println!("{:?}", customer_my_name);
-  let entity = CustomerEntity { name:    customer_name,
-                                my_name: Some(customer_my_name), };
+  let entity = CustomerInfoEntity::builder().id("01234")
+                                            .name("zenas")
+                                            .create_at(CreateAt(10u64))
+                                            .update_at(0u64)
+                                            .description(Some("Hello"))
+                                            .build();
 
   println!("{:?}", entity);
-  println!("{:?}", entity.ref_my_name());
-  let entity = entity.set_name(CustomerName("Zenas1".to_string()));
-  println!("{:?}", entity.ref_name());
+
+  let entity = entity.unwrap();
+  let id = entity.ref_id().clone().into_inner();
+  let name = entity.move_id().into_inner();
+
+  println!("id = {}", id);
+  println!("name = {}", name);
 }
