@@ -1,4 +1,8 @@
-use {crate::utils::DomainDefAst,
+use {crate::{ast::value::DomainValueAttr,
+             utils::{is_type_option,
+                     type_in_option_or_itself,
+                     value_type,
+                     DomainDefAst}},
      convert_case::{Case,
                     Casing},
      proc_macro2::TokenStream,
@@ -40,7 +44,7 @@ pub fn gen_store(ast: &DomainDefAst) -> TokenStream {
        .map(|f| {
          let name = &f.ident.as_ref().unwrap();
          let getter_name = format_ident!("ref_{}", name);
-         let is_option = super::utils::is_type_option(&f.ty);
+         let is_option = is_type_option(&f.ty);
          let name_string = name.to_string();
          if is_option {
            quote! {
@@ -62,6 +66,52 @@ pub fn gen_store(ast: &DomainDefAst) -> TokenStream {
   let select_fn_name = format_ident!("exec_select_{}", &ast.root_name_ident.to_string().to_case(Case::Snake));
   let sql_delete_fn_name = format_ident!("sql_delete_{}", &ast.root_name_ident.to_string().to_case(Case::Snake));
   let entity_params_fn_name = format_ident!("mysql_params_{}", &ast.root_name_ident.to_string().to_case(Case::Snake));
+
+  let get_row_items = ast.fields_named
+                         .named
+                         .iter()
+                         .map(|f| {
+                           let name = &f.ident.as_ref().unwrap();
+                           let name_str = name.to_string();
+
+                           let value_type = value_type(&ast.root_name_ident, f);
+                           let is_opt = is_type_option(&f.ty);
+                           let ty_inner = type_in_option_or_itself(f.ty.clone());
+                           let error_msg = format!("can't get {} from row", name_str);
+                           let skip = DomainValueAttr::parse_from(f).skip;
+                           if is_opt {
+                             quote! {
+                               let #name: Option<#value_type> = row.get_opt::<#ty_inner, &'static str>(#name_str).map(|x| x.ok()).flatten().map(|x| #value_type::new(x));
+                             }
+                           } else {
+                             if skip {
+                               quote! {
+                                 let #name = row.get::<#ty_inner, &'static str>(#name_str).ok_or_else(||{
+                                   tracing::info!(#error_msg);
+                                   mysql_common::row::convert::FromRowError(row.clone())
+                                 })?;
+                               }
+                             } else {
+                               quote! {
+                                 let #name = row.get::<#ty_inner, &'static str>(#name_str).map(|x| #value_type::new(x)).ok_or_else(||{
+                                   tracing::info!(#error_msg);
+                                   mysql_common::row::convert::FromRowError(row.clone())
+                                 })?;
+                               }
+                             }
+                           }
+                         })
+                         .collect::<Vec<_>>();
+  let build_entity_items = ast.fields_named
+                              .named
+                              .iter()
+                              .map(|f| {
+                                let name = &f.ident.as_ref().unwrap();
+                                quote! {
+                                  .#name(#name)
+                                }
+                              })
+                              .collect::<Vec<_>>();
 
   quote! {
     #[async_trait::async_trait]
@@ -111,10 +161,17 @@ pub fn gen_store(ast: &DomainDefAst) -> TokenStream {
         let condition: String = condition.into();
         let sql = format!("{} {}", sql, condition);
         sql.with(params).fetch(conn).await
-
       }
     }
-
-
+    // FromRow
+    impl mysql_async::prelude::FromRow for #entity_name_ident {
+      fn from_row_opt(row: mysql_common::row::Row) -> Result<Self, mysql_common::row::convert::FromRowError> where Self: Sized {
+        #(#get_row_items)*
+        Ok(#entity_name_ident::builder()
+          #(#build_entity_items)*
+          .unsafe_build()
+        )
+      }
+    }
   }
 }

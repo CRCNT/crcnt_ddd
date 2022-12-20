@@ -10,5 +10,5 @@ struct __Rice__ {
   name:        String,
   #[domain_values(skip)]
   create_time: CreateAt,
-  deleted:     bool,
+  deleted:     Option<bool>,
 }

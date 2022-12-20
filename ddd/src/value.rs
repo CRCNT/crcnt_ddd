@@ -12,11 +12,16 @@ use {chrono::{DateTime,
 pub struct CreateAt(UtcDateTime);
 #[derive(Debug, Clone)]
 pub struct UtcDateTime(DateTime<Utc>);
+
 impl UtcDateTime {
   pub fn now() -> Self { UtcDateTime(Utc::now()) }
 }
 impl CreateAt {
   pub fn now() -> Self { Self(UtcDateTime::now()) }
+
+  pub fn timestamp(&self) -> i64 { *&self.0.0.timestamp() }
+
+  pub fn timestamp_millis(&self) -> i64 { *&self.0.0.timestamp_millis() }
 }
 
 impl From<&UtcDateTime> for Value {

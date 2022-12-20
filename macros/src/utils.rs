@@ -1,7 +1,12 @@
-use {proc_macro2::Ident,
-     quote::format_ident,
+use {crate::ast::value::DomainValueAttr,
+     convert_case::{Case,
+                    Casing},
+     proc_macro2::Ident,
+     quote::{format_ident,
+             ToTokens},
      syn::{Data,
            DeriveInput,
+           Field,
            Fields,
            FieldsNamed,
            GenericArgument,
@@ -90,4 +95,16 @@ pub fn type_in_option_or_itself(ty: Type) -> Type {
   } else {
     return ty;
   }
+}
+
+pub fn value_type(root_name_ident: &Ident, f: &Field) -> Box<dyn ToTokens> {
+  let name = &f.ident;
+  let name = name.as_ref().unwrap();
+  let skip = DomainValueAttr::parse_from(f).skip;
+  let value_type: Box<dyn ToTokens> = if skip {
+    Box::new(f.ty.clone())
+  } else {
+    Box::new(format_ident!("{}{}", root_name_ident, name.to_string().to_case(Case::Pascal)))
+  };
+  value_type
 }

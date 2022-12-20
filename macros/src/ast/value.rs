@@ -43,7 +43,6 @@ impl syn::parse::Parser for DomainValueAttrParser {
 
   fn parse2(self, tokens: TokenStream) -> syn::Result<Self::Output> {
     let tokens_str = tokens.to_string();
-    dbg!(&tokens_str);
     Ok(DomainValueAttr { skip: tokens_str.eq("skip") })
   }
 }
