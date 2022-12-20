@@ -1,5 +1,7 @@
-use {crate::utils::{value_type,
-                    DomainDefAst},
+use {crate::{ast::value::DomainValueAttr,
+             utils::{type_in_option_or_itself,
+                     value_type,
+                     DomainDefAst}},
      proc_macro2::TokenStream,
      quote::{format_ident,
              quote}};
@@ -14,8 +16,9 @@ pub fn gen_entity(ast: &DomainDefAst) -> TokenStream {
                            let name = &f.ident;
                            let name = name.as_ref().unwrap();
                            let is_option = super::utils::is_type_option(&f.ty);
+                           let skip = DomainValueAttr::parse_from(f).skip;
                            let value_type = value_type(&ast.root_name_ident, f);
-                           if is_option {
+                           if (!skip) && is_option {
                              quote! {
                                #name: Option<#value_type>,
                              }
@@ -34,15 +37,28 @@ pub fn gen_entity(ast: &DomainDefAst) -> TokenStream {
                             let name = name.as_ref().unwrap();
                             let is_option = super::utils::is_type_option(&f.ty);
                             let value_type = value_type(&ast.root_name_ident, f);
-                            if is_option {
+                            let skip = DomainValueAttr::parse_from(f).skip;
+                            let builder_field_value_type = if (!skip) && is_option {
                               quote! {
-                                #name: Option<Option<#value_type>>,
+                                Option<#value_type>
                               }
                             } else {
                               quote! {
-                                #name: Option<#value_type>,
+                                #value_type
                               }
+                            };
+                            quote! {
+                              #name: Option<#builder_field_value_type>,
                             }
+                            // if is_option {
+                            // quote! {
+                            // #name: Option<#builder_field_value_type>,
+                            // }
+                            // } else {
+                            // quote! {
+                            // #name: #builder_field_value_type,
+                            // }
+                            // }
                           })
                           .collect::<Vec<_>>();
   // getters
@@ -55,15 +71,25 @@ pub fn gen_entity(ast: &DomainDefAst) -> TokenStream {
                                                                   let getter_name = format_ident!("ref_{}", name);
                                                                   let mv_name = format_ident!("move_{}", name);
                                                                   let setter_name = format_ident!("set_{}", name);
+                                                                  let skip = DomainValueAttr::parse_from(f).skip;
+                                                                  let getter_setter_value_type = if skip {
+                                                                    quote! {
+                                                                      #value_type
+                                                                    }
+                                                                  } else {
+                                                                    quote! {
+                                                                      Option<#value_type>
+                                                                    }
+                                                                  };
                                                                   if is_option {
                                                                     quote! {
-                                                                      pub fn #getter_name(&self) -> &Option<#value_type> {
+                                                                      pub fn #getter_name(&self) -> &#getter_setter_value_type {
                                                                         &self.#name
                                                                       }
-                                                                      pub fn #mv_name(self) -> Option<#value_type> {
+                                                                      pub fn #mv_name(self) -> #getter_setter_value_type {
                                                                         self.#name
                                                                       }
-                                                                      pub fn #setter_name(self, new_value: Option<#value_type>) -> Self {
+                                                                      pub fn #setter_name(self, new_value: #getter_setter_value_type) -> Self {
                                                                         Self {
                                                                           #name: new_value,
                                                                           ..self
@@ -95,11 +121,22 @@ pub fn gen_entity(ast: &DomainDefAst) -> TokenStream {
                              let name = name.as_ref().unwrap();
                              let is_option = super::utils::is_type_option(&f.ty);
                              let value_type = value_type(&ast.root_name_ident, f);
+                             let inner_type = type_in_option_or_itself(f.ty.clone());
+                             let skip = DomainValueAttr::parse_from(f).skip;
                              if is_option {
-                               quote! {
-                                 pub fn #name<T: Into<#value_type>>(mut self, new_value: Option<T>) -> Self {
-                                   self.#name = Some(new_value.map(|x|x.into()));
-                                   self
+                               if skip {
+                                 quote! {
+                                   pub fn #name<T: Into<#inner_type>>(mut self, new_value: Option<T>) -> Self {
+                                     self.#name = Some(new_value.map(|x|x.into()));
+                                     self
+                                   }
+                                 }
+                               } else {
+                                 quote! {
+                                   pub fn #name<T: Into<#value_type>>(mut self, new_value: Option<T>) -> Self {
+                                     self.#name = Some(new_value.map(|x|x.into()));
+                                     self
+                                   }
                                  }
                                }
                              } else {

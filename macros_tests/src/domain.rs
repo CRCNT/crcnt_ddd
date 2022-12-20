@@ -1,4 +1,6 @@
-use {crcnt_ddd::value::CreateAt,
+use {crcnt_ddd::value::{CreateAt,
+                        Deleted,
+                        UpdateAt},
      crcnt_ddd_macros::{DomainEntity,
                         DomainStore,
                         DomainValues}};
@@ -10,5 +12,8 @@ struct __Rice__ {
   name:        String,
   #[domain_values(skip)]
   create_time: CreateAt,
-  deleted:     Option<bool>,
+  #[domain_values(skip)]
+  update_time: UpdateAt,
+  #[domain_values(skip)]
+  deleted:     Option<Deleted>,
 }

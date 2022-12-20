@@ -64,6 +64,7 @@ pub fn gen_store(ast: &DomainDefAst) -> TokenStream {
   let update_fn_name = format_ident!("exec_update_{}", &ast.root_name_ident.to_string().to_case(Case::Snake));
   let sql_select_fn_name = format_ident!("sql_select_{}", &ast.root_name_ident.to_string().to_case(Case::Snake));
   let select_fn_name = format_ident!("exec_select_{}", &ast.root_name_ident.to_string().to_case(Case::Snake));
+  let get_fn_name = format_ident!("exec_get_{}", &ast.root_name_ident.to_string().to_case(Case::Snake));
   let sql_delete_fn_name = format_ident!("sql_delete_{}", &ast.root_name_ident.to_string().to_case(Case::Snake));
   let entity_params_fn_name = format_ident!("mysql_params_{}", &ast.root_name_ident.to_string().to_case(Case::Snake));
 
@@ -80,8 +81,14 @@ pub fn gen_store(ast: &DomainDefAst) -> TokenStream {
                            let error_msg = format!("can't get {} from row", name_str);
                            let skip = DomainValueAttr::parse_from(f).skip;
                            if is_opt {
-                             quote! {
-                               let #name: Option<#value_type> = row.get_opt::<#ty_inner, &'static str>(#name_str).map(|x| x.ok()).flatten().map(|x| #value_type::new(x));
+                             if skip {
+                               quote! {
+                                 let #name = row.get_opt::<#ty_inner, &'static str>(#name_str).map(|x| x.ok()).flatten();
+                               }
+                             } else {
+                               quote! {
+                                 let #name = row.get_opt::<#ty_inner, &'static str>(#name_str).map(|x| x.ok()).flatten().map(|x| #value_type::new(x));
+                               }
                              }
                            } else {
                              if skip {
@@ -113,6 +120,7 @@ pub fn gen_store(ast: &DomainDefAst) -> TokenStream {
                               })
                               .collect::<Vec<_>>();
 
+  let entity_id_ident = format_ident!("{}Id", ast.root_name_ident);
   quote! {
     #[async_trait::async_trait]
     pub trait #basic_store_helper_ident {
@@ -161,6 +169,16 @@ pub fn gen_store(ast: &DomainDefAst) -> TokenStream {
         let condition: String = condition.into();
         let sql = format!("{} {}", sql, condition);
         sql.with(params).fetch(conn).await
+      }
+      async fn #get_fn_name<'a, 't: 'a, C, T>(&self, id: &#entity_id_ident, conn: C) -> mysql_async::Result<Option<T>>
+      where  C: mysql_async::prelude::ToConnection<'a, 't> + 'a,
+             T: mysql_async::prelude::FromRow + Send + 'static,
+      {
+        use mysql_async::prelude::{Query, WithParams, params};
+        let sql = self.#sql_select_fn_name();
+        let sql = format!("{} WHERE id = :id", sql);
+        let params = params! {"id" => id.inner()};
+        sql.with(params).first(conn).await
       }
     }
     // FromRow
