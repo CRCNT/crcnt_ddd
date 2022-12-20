@@ -1,6 +1,4 @@
 use {crate::utils::DomainDefAst,
-     convert_case::{Case,
-                    Casing},
      proc_macro2::TokenStream,
      quote::{format_ident,
              quote}};

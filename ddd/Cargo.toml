@@ -1,0 +1,20 @@
+[package]
+name = "crcnt_ddd"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+name = "crcnt_ddd"
+path = "src/lib.rs"
+
+[dependencies]
+crcnt_ddd_macros = {path = "../macros"}
+mysql_async = "0.31"
+chrono = "0.4"
+serde = {version = "1.0", features=["derive"]}
+
+[dependencies.mysql_common]
+version = "0.29"
+features = ["chrono"]
+
+serde = "1.0"

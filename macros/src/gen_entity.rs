@@ -1,9 +1,13 @@
-use {crate::utils::DomainDefAst,
+use {crate::{ast::value::DomainValueAttr,
+             utils::DomainDefAst},
      convert_case::{Case,
                     Casing},
-     proc_macro2::TokenStream,
+     proc_macro2::{Ident,
+                   TokenStream},
      quote::{format_ident,
-             quote}};
+             quote,
+             ToTokens},
+     syn::Field};
 
 pub fn gen_entity(ast: &DomainDefAst) -> TokenStream {
   let entity_name_ident = format_ident!("{}Entity", ast.root_name_ident);
@@ -15,8 +19,8 @@ pub fn gen_entity(ast: &DomainDefAst) -> TokenStream {
                            let name = &f.ident;
                            let name = name.as_ref().unwrap();
                            let is_option = super::utils::is_type_option(&f.ty);
-                           let value_type = format_ident!("{}{}", ast.root_name_ident, name.to_string().to_case(Case::Pascal));
-                           let ts = if is_option {
+                           let value_type = value_type(&ast.root_name_ident, f);
+                           if is_option {
                              quote! {
                                #name: Option<#value_type>,
                              }
@@ -24,8 +28,7 @@ pub fn gen_entity(ast: &DomainDefAst) -> TokenStream {
                              quote! {
                                #name: #value_type,
                              }
-                           };
-                           ts
+                           }
                          })
                          .collect::<Vec<_>>();
   let builder_fields = ast.fields_named
@@ -35,7 +38,7 @@ pub fn gen_entity(ast: &DomainDefAst) -> TokenStream {
                             let name = &f.ident;
                             let name = name.as_ref().unwrap();
                             let is_option = super::utils::is_type_option(&f.ty);
-                            let value_type = format_ident!("{}{}", ast.root_name_ident, name.to_string().to_case(Case::Pascal));
+                            let value_type = value_type(&ast.root_name_ident, f);
                             if is_option {
                               quote! {
                                 #name: Option<Option<#value_type>>,
@@ -48,47 +51,47 @@ pub fn gen_entity(ast: &DomainDefAst) -> TokenStream {
                           })
                           .collect::<Vec<_>>();
   // getters
-  let entity_getters_and_setters =
-    ast.fields_named.named.iter().map(|f| {
-                                   let name = &f.ident;
-                                   let name = name.as_ref().unwrap();
-                                   let is_option = super::utils::is_type_option(&f.ty);
-                                   let value_type = format_ident!("{}{}", ast.root_name_ident, name.to_string().to_case(Case::Pascal));
-                                   let getter_name = format_ident!("ref_{}", name);
-                                   let mv_name = format_ident!("move_{}", name);
-                                   let setter_name = format_ident!("set_{}", name);
-                                   if is_option {
-                                     quote! {
-                                       pub fn #getter_name(&self) -> &Option<#value_type> {
-                                         &self.#name
-                                       }
-                                       pub fn #mv_name(self) -> Option<#value_type> {
-                                         self.#name
-                                       }
-                                       pub fn #setter_name(self, new_value: Option<#value_type>) -> Self {
-                                         Self {
-                                           #name: new_value,
-                                           ..self
-                                         }
-                                       }
-                                     }
-                                   } else {
-                                     quote! {
-                                       pub fn #getter_name(&self) -> &#value_type {
-                                         &self.#name
-                                       }
-                                       pub fn #mv_name(self) -> #value_type {
-                                         self.#name
-                                       }
-                                       pub fn #setter_name(self, new_value: #value_type) -> Self {
-                                         Self {
-                                           #name: new_value,
-                                           ..self
-                                         }
-                                       }
-                                     }
-                                   }
-                                 });
+  let entity_getters_and_setters = ast.fields_named.named.iter().map(|f| {
+                                                                  let name = &f.ident;
+                                                                  let name = name.as_ref().unwrap();
+                                                                  let is_option = super::utils::is_type_option(&f.ty);
+                                                                  let value_type = value_type(&ast.root_name_ident, f);
+
+                                                                  let getter_name = format_ident!("ref_{}", name);
+                                                                  let mv_name = format_ident!("move_{}", name);
+                                                                  let setter_name = format_ident!("set_{}", name);
+                                                                  if is_option {
+                                                                    quote! {
+                                                                      pub fn #getter_name(&self) -> &Option<#value_type> {
+                                                                        &self.#name
+                                                                      }
+                                                                      pub fn #mv_name(self) -> Option<#value_type> {
+                                                                        self.#name
+                                                                      }
+                                                                      pub fn #setter_name(self, new_value: Option<#value_type>) -> Self {
+                                                                        Self {
+                                                                          #name: new_value,
+                                                                          ..self
+                                                                        }
+                                                                      }
+                                                                    }
+                                                                  } else {
+                                                                    quote! {
+                                                                      pub fn #getter_name(&self) -> &#value_type {
+                                                                        &self.#name
+                                                                      }
+                                                                      pub fn #mv_name(self) -> #value_type {
+                                                                        self.#name
+                                                                      }
+                                                                      pub fn #setter_name(self, new_value: #value_type) -> Self {
+                                                                        Self {
+                                                                          #name: new_value,
+                                                                          ..self
+                                                                        }
+                                                                      }
+                                                                    }
+                                                                  }
+                                                                });
   let builder_setters = ast.fields_named
                            .named
                            .iter()
@@ -96,8 +99,7 @@ pub fn gen_entity(ast: &DomainDefAst) -> TokenStream {
                              let name = &f.ident;
                              let name = name.as_ref().unwrap();
                              let is_option = super::utils::is_type_option(&f.ty);
-                             let value_type = format_ident!("{}{}", ast.root_name_ident, name.to_string().to_case(Case::Pascal));
-
+                             let value_type = value_type(&ast.root_name_ident, f);
                              if is_option {
                                quote! {
                                  pub fn #name<T: Into<#value_type>>(mut self, new_value: Option<T>) -> Self {
@@ -122,9 +124,9 @@ pub fn gen_entity(ast: &DomainDefAst) -> TokenStream {
                         .map(|f| {
                           let name = &f.ident;
                           let name = name.as_ref().unwrap();
-
+                          let error_msg = format!("{}::{} not set", entity_name_ident, name);
                           quote! {
-                            let #name = self.#name.ok_or_else(|| format!("{}::{} not set", stringify!(#entity_name_ident), stringify!(#name)))?;
+                            let #name = self.#name.ok_or_else(|| #error_msg)?;
                           }
                         })
                         .collect::<Vec<_>>();
@@ -163,7 +165,7 @@ pub fn gen_entity(ast: &DomainDefAst) -> TokenStream {
     // implementation for entity builders
     impl #entity_builder_name_ident {
       #[doc = "Build the entity, if some field is not set, then return error message to hint the missed field"]
-      pub fn build(self) -> std::result::Result<#entity_name_ident, String> {
+      pub fn build(self) -> std::result::Result<#entity_name_ident, &'static str> {
         #(#building_var)*
         Ok(#entity_name_ident {
           #(#building_var_names)*
@@ -177,4 +179,16 @@ pub fn gen_entity(ast: &DomainDefAst) -> TokenStream {
       #(#builder_setters)*
     }
   }
+}
+
+fn value_type(root_name_ident: &Ident, f: &Field) -> Box<dyn ToTokens> {
+  let name = &f.ident;
+  let name = name.as_ref().unwrap();
+  let skip = DomainValueAttr::parse_from(f).skip;
+  let value_type: Box<dyn ToTokens> = if skip {
+    Box::new(f.ty.clone())
+  } else {
+    Box::new(format_ident!("{}{}", root_name_ident, name.to_string().to_case(Case::Pascal)))
+  };
+  value_type
 }

@@ -4,6 +4,21 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-macros = {path = "../macros"}
+crcnt_ddd_macros = {path = "../macros"}
+crcnt_ddd = {path = "../ddd"}
 serde = {version = "1.0", features=["derive"]}
 serde_json = "1.0"
+mysql_async = "0.31"
+chrono = "0.4"
+async-trait = "0.1"
+anyhow = "1.0"
+thiserror = "1.0"
+
+[dependencies.mysql_common]
+version = "0.29"
+features = ["chrono"]
+
+[dependencies.tokio]
+version = "1.21"
+features = ["full"]
+[dev-dependencies]

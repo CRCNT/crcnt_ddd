@@ -1,16 +1,14 @@
-use {crcnt_ddd_macros::DomainModel,
-     serde::{Deserialize,
-             Serialize}};
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct CreateAt(pub u64);
+use {crcnt_ddd::value::CreateAt,
+     crcnt_ddd_macros::{DomainEntity,
+                        DomainStore,
+                        DomainValues}};
 
 #[allow(dead_code)]
-#[derive(DomainModel, Debug, Clone)]
-struct __CustomerInfo__ {
+#[derive(DomainEntity, DomainValues, DomainStore)]
+struct __Rice__ {
   id:          String,
   name:        String,
-  description: Option<String>,
-  create_at:   CreateAt,
-  update_at:   u64,
+  #[domain_values(skip)]
+  create_time: CreateAt,
+  deleted:     bool,
 }

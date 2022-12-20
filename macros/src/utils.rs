@@ -12,6 +12,7 @@ pub struct DomainDefAst {
   pub root_name_ident: Ident,
   pub fields_named:    FieldsNamed,
 }
+
 impl DomainDefAst {
   pub fn new(derive_input: DeriveInput) -> Self {
     let name = derive_input.ident.clone();
