@@ -2,8 +2,7 @@ use {crate::utils::{value_type,
                     DomainDefAst},
      proc_macro2::TokenStream,
      quote::{format_ident,
-             quote,
-             ToTokens}};
+             quote}};
 
 pub fn gen_entity(ast: &DomainDefAst) -> TokenStream {
   let entity_name_ident = format_ident!("{}Entity", ast.root_name_ident);
