@@ -15,6 +15,12 @@ pub struct CreateAt(UtcDateTime);
 #[derive(Debug, Clone, DomainValue)]
 pub struct UpdateAt(UtcDateTime);
 
+#[derive(Debug, Clone, DomainValue)]
+pub struct AvailableSince(UtcDateTime);
+
+#[derive(Debug, Clone, DomainValue)]
+pub struct ExpiredSince(UtcDateTime);
+
 /// Deleted is a logic deletion flag
 #[derive(Debug, Clone, DomainValue)]
 pub struct Deleted(bool);
@@ -40,6 +46,44 @@ impl CreateAt {
   pub fn timestamp(&self) -> i64 { *&self.0.0.timestamp() }
 
   pub fn timestamp_millis(&self) -> i64 { *&self.0.0.timestamp_millis() }
+}
+
+impl AvailableSince {
+  pub fn now() -> Self { Self(UtcDateTime::now()) }
+
+  pub fn timestamp(&self) -> i64 { *&self.0.0.timestamp() }
+
+  pub fn timestamp_millis(&self) -> i64 { *&self.0.0.timestamp_millis() }
+
+  pub fn from_rfc3399(s: &str) -> Result<Self, String> {
+    let date_time = DateTime::parse_from_rfc3339(s).map_err(|e| format!("AvailableSince parse error: {}", e.to_string()))?;
+    let expired = date_time.with_timezone(&Utc);
+    Ok(AvailableSince(UtcDateTime(expired)))
+  }
+
+  pub fn is_available_now(&self) -> bool {
+    let now = Utc::now();
+    &self.0.0 <= &now
+  }
+}
+
+impl ExpiredSince {
+  pub fn now() -> Self { Self(UtcDateTime::now()) }
+
+  pub fn timestamp(&self) -> i64 { *&self.0.0.timestamp() }
+
+  pub fn timestamp_millis(&self) -> i64 { *&self.0.0.timestamp_millis() }
+
+  pub fn from_rfc3399(s: &str) -> Result<Self, String> {
+    let date_time = DateTime::parse_from_rfc3339(s).map_err(|e| format!("ExpiredSince parse error: {}", e.to_string()))?;
+    let expired = date_time.with_timezone(&Utc);
+    Ok(ExpiredSince(UtcDateTime(expired)))
+  }
+
+  pub fn is_expired_now(&self) -> bool {
+    let now = Utc::now();
+    &self.inner().0 <= &now
+  }
 }
 
 impl UpdateAt {
@@ -100,6 +144,34 @@ impl ConvIr<UpdateAt> for TimestampIr {
   fn rollback(self) -> Value { Value::from(self.ndt) }
 }
 
+impl ConvIr<AvailableSince> for TimestampIr {
+  fn new(v: Value) -> Result<Self, FromValueError> {
+    let ndt = NaiveDateTime::from_value_opt(v)?;
+    Ok(Self { ndt })
+  }
+
+  fn commit(self) -> AvailableSince {
+    let dt = DateTime::from_utc(self.ndt, Utc);
+    AvailableSince(UtcDateTime(dt))
+  }
+
+  fn rollback(self) -> Value { Value::from(self.ndt) }
+}
+
+impl ConvIr<ExpiredSince> for TimestampIr {
+  fn new(v: Value) -> Result<Self, FromValueError> {
+    let ndt = NaiveDateTime::from_value_opt(v)?;
+    Ok(Self { ndt })
+  }
+
+  fn commit(self) -> ExpiredSince {
+    let dt = DateTime::from_utc(self.ndt, Utc);
+    ExpiredSince(UtcDateTime(dt))
+  }
+
+  fn rollback(self) -> Value { Value::from(self.ndt) }
+}
+
 impl ConvIr<Deleted> for DeletedIr {
   fn new(v: Value) -> Result<Self, FromValueError> {
     let b = bool::from_value_opt(v)?;
@@ -143,6 +215,12 @@ impl FromValue for CreateAt {
   type Intermediate = TimestampIr;
 }
 impl FromValue for UpdateAt {
+  type Intermediate = TimestampIr;
+}
+impl FromValue for AvailableSince {
+  type Intermediate = TimestampIr;
+}
+impl FromValue for ExpiredSince {
   type Intermediate = TimestampIr;
 }
 impl FromValue for Deleted {
