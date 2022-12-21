@@ -23,4 +23,6 @@ struct __Rice__ {
   updater:     Updater,
   #[domain_values(skip = true)]
   deleted:     Option<Deleted>,
+  #[domain_values(skip = false, value_kind = "enum", enums = "Active|Inactive")]
+  status:      String,
 }
