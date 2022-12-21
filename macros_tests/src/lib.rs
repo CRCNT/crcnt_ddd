@@ -30,6 +30,8 @@ async fn test_values() -> anyhow::Result<()> {
                                   .name("东北大米")
                                   .create_time(CreateAt::now())
                                   .update_time(UpdateAt::now())
+                                  .creator("test")
+                                  .updater("test")
                                   .deleted(Some(Deleted::new(false)))
                                   .unsafe_build();
   println!("rice: {:?}", rice);

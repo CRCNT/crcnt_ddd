@@ -1,6 +1,8 @@
 use {crcnt_ddd::value::{CreateAt,
+                        Creator,
                         Deleted,
-                        UpdateAt},
+                        UpdateAt,
+                        Updater},
      crcnt_ddd_macros::{DomainEntity,
                         DomainStore,
                         DomainValues}};
@@ -14,6 +16,10 @@ struct __Rice__ {
   create_time: CreateAt,
   #[domain_values(skip)]
   update_time: UpdateAt,
+  #[domain_values(skip)]
+  creator:     Creator,
+  #[domain_values(skip)]
+  updater:     Updater,
   #[domain_values(skip)]
   deleted:     Option<Deleted>,
 }

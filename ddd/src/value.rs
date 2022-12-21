@@ -19,6 +19,14 @@ pub struct UpdateAt(UtcDateTime);
 #[derive(Debug, Clone, DomainValue)]
 pub struct Deleted(bool);
 
+/// Creator
+#[derive(Debug, Clone, DomainValue)]
+pub struct Creator(String);
+
+/// Updater
+#[derive(Debug, Clone, DomainValue)]
+pub struct Updater(String);
+
 #[derive(Debug, Clone)]
 pub struct UtcDateTime(DateTime<Utc>);
 
@@ -57,6 +65,11 @@ pub struct TimestampIr {
 #[derive(Debug)]
 pub struct DeletedIr {
   b: bool,
+}
+
+#[derive(Debug)]
+pub struct StrIr {
+  bytes: Vec<u8>,
 }
 
 impl ConvIr<CreateAt> for TimestampIr {
@@ -98,6 +111,34 @@ impl ConvIr<Deleted> for DeletedIr {
   fn rollback(self) -> Value { Value::from(self.b) }
 }
 
+impl ConvIr<Creator> for StrIr {
+  fn new(v: Value) -> Result<Self, FromValueError> {
+    let bytes = Vec::<u8>::from_value_opt(v)?;
+    Ok(StrIr { bytes })
+  }
+
+  fn commit(self) -> Creator {
+    let creator = String::from_utf8_lossy(&self.bytes).to_string();
+    Creator(creator)
+  }
+
+  fn rollback(self) -> Value { Value::from(self.bytes) }
+}
+
+impl ConvIr<Updater> for StrIr {
+  fn new(v: Value) -> Result<Self, FromValueError> {
+    let bytes = Vec::<u8>::from_value_opt(v)?;
+    Ok(StrIr { bytes })
+  }
+
+  fn commit(self) -> Updater {
+    let updater = String::from_utf8_lossy(&self.bytes).to_string();
+    Updater(updater)
+  }
+
+  fn rollback(self) -> Value { Value::from(self.bytes) }
+}
+
 impl FromValue for CreateAt {
   type Intermediate = TimestampIr;
 }
@@ -106,4 +147,10 @@ impl FromValue for UpdateAt {
 }
 impl FromValue for Deleted {
   type Intermediate = DeletedIr;
+}
+impl FromValue for Creator {
+  type Intermediate = StrIr;
+}
+impl FromValue for Updater {
+  type Intermediate = StrIr;
 }
