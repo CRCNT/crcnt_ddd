@@ -32,7 +32,7 @@ pub fn domain_def(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
   proc_macro::TokenStream::from(expanded)
 }
 
-#[proc_macro_derive(DomainStore, attributes(domain_values))]
+#[proc_macro_derive(DomainStore, attributes(domain_values, domain_store))]
 pub fn domain_store_def(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
   let derive_input = parse_macro_input!(input as DeriveInput);
   let domain_def_ast = DomainDefAst::new(derive_input);

@@ -13,7 +13,8 @@ pub fn gen_store(ast: &DomainDefAst) -> TokenStream {
   let entity_name_ident = format_ident!("{}Entity", ast.root_name_ident);
   // let store_name_ident = format_ident!("{}Store", ast.root_name_ident);
   let basic_store_helper_ident = format_ident!("{}BasicStoreHelper", ast.root_name_ident);
-  let table_name = format!("t_{}", ast.root_name_ident.to_string().to_case(Case::Snake));
+  // let table_name = format!("t_{}", ast.root_name_ident.to_string().to_case(Case::Snake));
+  let table_name = &ast.domain_attr.table_name;
   let field_names = ast.fields_named
                        .named
                        .iter()

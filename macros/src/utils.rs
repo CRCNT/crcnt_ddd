@@ -1,4 +1,5 @@
-use {crate::ast::value::DomainValueAttr,
+use {crate::ast::value::{DomainAttr,
+                         DomainValueAttr},
      convert_case::{Case,
                     Casing},
      proc_macro2::Ident,
@@ -16,10 +17,13 @@ use {crate::ast::value::DomainValueAttr,
 pub struct DomainDefAst {
   pub root_name_ident: Ident,
   pub fields_named:    FieldsNamed,
+  pub domain_attr:     DomainAttr,
 }
 
 impl DomainDefAst {
   pub fn new(derive_input: DeriveInput) -> Self {
+    let domain_attr = DomainAttr::parse_from(&derive_input);
+
     let name = derive_input.ident.clone();
     let name_string = name.to_string();
     if !name_string.ends_with("__") || !name_string.starts_with("__") {
@@ -27,12 +31,14 @@ impl DomainDefAst {
     }
     let root_name = &name_string[2 .. (name_string.len() - 2)];
     let root_name_ident = format_ident!("{}", root_name);
+
     match derive_input.data {
       | Data::Struct(data) => match data.fields {
         | Fields::Named(ref fields) => {
           let fields_named = fields.clone();
           DomainDefAst { root_name_ident,
-                         fields_named }
+                         fields_named,
+                         domain_attr: domain_attr.unwrap_or_else(|| DomainAttr { table_name: format!("t_{}", root_name.to_case(Case::Snake)), }) }
         }
         | _ => panic!("DomainDTO should be fields-named"),
       },
