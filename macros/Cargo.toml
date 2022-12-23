@@ -20,4 +20,4 @@ syn = {version = "1.0", features=["full", "fold", "derive"]}
 quote = "1.0"
 convert_case = "0.6"
 toml = "0.5"
-serde = "1.0"
+serde = {version = "1.0", features = ["derive"]}

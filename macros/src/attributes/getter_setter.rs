@@ -4,13 +4,13 @@ use {proc_macro2::Ident,
            Fields,
            Type}};
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub struct GetterSetterMeta {
   pub ident:     Ident,
   pub raw_types: Vec<RawType>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub struct RawType {
   pub ident: Ident,
   pub ty:    Type,

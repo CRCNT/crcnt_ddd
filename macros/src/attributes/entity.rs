@@ -12,27 +12,27 @@ use {convert_case::{Case,
            Fields,
            Type}};
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub struct EntityMeta {
   pub root_ident: Ident,
   pub attr:       ExactEntityAttr,
   pub fields:     EntityFields,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub struct ExactEntityAttr {
   pub rename:            String,
   pub value_type_prefix: String,
 }
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Clone, Deserialize)]
 pub struct EntityAttr {
   pub rename:            Option<String>,
   pub value_type_prefix: Option<String>,
 }
 pub struct EntityAttrParser;
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub struct EntityField {
   pub name:          String,
   pub primary_type:  Type,
@@ -93,7 +93,7 @@ impl EntityFieldAttr {
   }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub struct EntityFields(Vec<EntityField>);
 impl EntityFields {
   pub fn all_fields(&self) -> &Vec<EntityField> { &self.0 }

@@ -8,7 +8,7 @@ use {crate::attributes::{entity::EntityFields,
      serde::Deserialize,
      syn::DeriveInput};
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub struct StoreMeta {
   pub table_name:        String,
   pub entity_ident:      Ident,
@@ -22,7 +22,7 @@ pub struct StoreMeta {
   pub params_extractor:  Option<String>,
 }
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Clone, Deserialize)]
 pub struct StoreAttr {
   table_name:       Option<String>,
   rename:           Option<String>,
