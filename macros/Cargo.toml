@@ -6,7 +6,7 @@ homepage = "https://github.com/CRCNT/crcnt_ddd/tree/main/macros"
 documentation = "https://github.com/CRCNT/crcnt_ddd/tree/main/macros"
 repository = "https://github.com/CRCNT/crcnt_ddd/tree/main/macros"
 readme = "README.md"
-version = "0.1.3"
+version = "0.2.0"
 edition = "2021"
 
 [lib]
@@ -16,7 +16,7 @@ proc-macro = true
 
 [dependencies]
 proc-macro2 = "1.0"
-syn = {version = "1.0", features=["full", "fold"]}
+syn = {version = "1.0", features=["full", "fold", "derive"]}
 quote = "1.0"
 convert_case = "0.6"
 toml = "0.5"

@@ -42,6 +42,7 @@ impl syn::parse::Parser for DomainValueAttrParser {
 
   fn parse2(self, tokens: TokenStream) -> syn::Result<Self::Output> {
     let tokens_str = tokens.to_string();
+    // dbg!(&tokens_str);
     let attr: DomainValueAttr = toml::from_str(tokens_str.split(",").collect::<Vec<_>>().join("\n").as_str()).unwrap();
     Ok(attr)
   }

@@ -1,65 +1,86 @@
-mod domain;
+// mod domain_entity;
 
-use {crate::domain::*,
-     crcnt_ddd::value::{CreateAt,
-                        Deleted,
-                        UpdateAt},
-     mysql_async::{params,
-                   TxOpts}};
+mod rice {
+  use {crcnt_ddd::value::{CreateAt,
+                          Creator,
+                          Deleted,
+                          UpdateAt,
+                          Updater},
+       crcnt_ddd_macros::Domain};
 
-pub struct SomeStore {}
-
-#[test]
-fn test_entity() -> anyhow::Result<()> {
-  let rice = RiceEntity::builder().id("1")
-                                  .name("zenas")
-                                  .create_time(CreateAt::now())
-                                  .update_time(UpdateAt::now())
-                                  .deleted(Some(true))
-                                  .unsafe_build();
-
-  println!("{:?}", rice);
-  Ok(())
+  #[derive(Domain)]
+  #[domain_commands(entity, store)]
+  #[domain_store(table_name = "t_rice", params_extractor = "super::mysql_tools::params_inspect")]
+  struct __Rice__ {
+    id:          String,
+    name:        String,
+    #[domain_value(skip_new_type = true)]
+    create_time: CreateAt,
+    update_time: UpdateAt,
+    #[domain_value(skip_new_type = true)]
+    creator:     Creator,
+    updater:     Updater,
+    deleted:     Deleted,
+  }
 }
 
-impl RiceBasicStoreHelper for SomeStore {}
+mod mysql_tools;
 
-#[tokio::test]
-async fn test_values() -> anyhow::Result<()> {
-  let rice = RiceEntity::builder().id("01")
-                                  .name("东北大米")
-                                  .create_time(CreateAt::now())
-                                  .update_time(UpdateAt::now())
-                                  .creator("test")
-                                  .updater("test")
-                                  .deleted(Some(Deleted::new(false)))
-                                  .unsafe_build();
-  println!("rice: {:?}", rice);
-  let pool = mysql_async::Pool::new("mysql://promo_user:promo_userpw@localhost:3306/promo");
+mod test {
+  use {super::rice::*,
+       crcnt_ddd::value::{CreateAt,
+                          Creator,
+                          Deleted,
+                          UpdateAt,
+                          Updater},
+       mysql_async::Pool,
+       mysql_common::params::Params,
+       tracing_subscriber::{fmt,
+                            prelude::__tracing_subscriber_SubscriberExt,
+                            util::SubscriberInitExt,
+                            EnvFilter}};
 
-  let store = SomeStore {};
-  let sql = store.sql_insert_rice();
-  println!("sql: {}", sql);
+  struct Store;
+  impl RiceEntityCRUDStmt for Store {}
+  impl RiceEntityCRUDExec for Store {}
 
-  let mut conn = pool.get_conn().await?;
-  let mut txn = conn.start_transaction(TxOpts::default()).await?;
+  #[tokio::test]
+  async fn test_macros() -> anyhow::Result<()> {
+    tracing_subscriber::registry().with(fmt::Layer::default())
+                                  .with(EnvFilter::new("warn,macros_tests=debug"))
+                                  .try_init()
+                                  .unwrap();
 
-  let _ = store.exec_insert_rice(&rice, &mut txn).await?;
+    let pool: Pool = Pool::new("mysql://promo_user:promo_userpw@localhost:3306/promo");
+    let mut conn = pool.get_conn().await?;
 
-  let rice = rice.set_name("日本大米".into());
-  let _ = store.exec_update_rice(&rice, &mut txn).await?;
-  let rows = txn.affected_rows();
-  println!("updated {} rows", rows);
+    let rice = RiceEntity::builder().id("01".into())
+                                    .name("山东大米".into())
+                                    .create_time(CreateAt::now())
+                                    .update_time(UpdateAt::now().into())
+                                    .creator(Creator::new("zenas"))
+                                    .updater(RiceUpdater::new(Updater::new("zenas")))
+                                    .deleted(RiceDeleted::new(Deleted::new(false)))
+                                    .build();
 
-  let _ = txn.commit().await?;
-  println!("committed");
+    match Store.exec_insert_rice_entity(&rice, &mut conn).await {
+      | Ok(_) => {}
+      | Err(e) => {
+        eprintln!("e: {}", e.to_string());
+      }
+    }
 
-  let xs: mysql_async::Result<Vec<RiceEntity>> = store.exec_select_rice("where id = :id", params! {"id" => "01"}, &mut conn).await;
+    let rice_id = RiceId::new("01");
+    let rice: Option<RiceEntity> = Store.exec_get_rice_entity(&rice_id, &mut conn).await?;
+    println!("{:?}", rice);
+    let rice = rice.unwrap();
+    let rice = rice.set_name("哥斯达黎加大米".into());
+    let _ = Store.exec_update_rice_entity(&rice, &mut conn).await?;
+    let rice: Option<RiceEntity> = Store.exec_get_rice_entity(&rice_id, &mut conn).await?;
+    println!("{:?}", rice);
 
-  println!("xs: {:?}", xs);
+    let _ = Store.exec_delete_where_rice_entity("where 1 = 1", Params::Empty, &mut conn).await?;
 
-  let id: RiceId = RiceId::new("01");
-  let rice_entity: Option<RiceEntity> = store.exec_get_rice(&id, &mut conn).await?;
-  dbg!(rice_entity);
-  Ok(())
+    Ok(())
+  }
 }
