@@ -74,6 +74,7 @@ mod test_domain {
     age:       u32,
     #[domain_value(enums = "Active|Inactive")]
     status:    String,
+    #[domain_value(skip_new_type = true)]
     create_at: CreateAt,
     update_at: UpdateAt,
     deleted:   Deleted,
@@ -93,13 +94,20 @@ async fn test_entity() -> Result<()> {
                                      .name(Some("zenas".into()))
                                      .age(Some(10u32.into()))
                                      .status(PEStatus::Active)
-                                     .create_at(CreateAt::now().into())
+                                     .create_at(CreateAt::now())
                                      .update_at(UpdateAt::now().into())
                                      .deleted(Deleted::new(true).into())
                                      .build();
   let new_id = PEId::new("2");
   println!("ent: {:?}", ent);
   eprintln!("new_id: {:?}", new_id);
+
+  let ent = ent.set_id("2".into()).set_name(Some("name1".into()));
+
+  let id = ent.ref_id();
+  let name = ent.ref_name();
+  println!("id = {:?}", id.inner());
+  println!("name = {:?}", name);
   Ok(())
 }
 

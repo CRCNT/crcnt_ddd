@@ -59,7 +59,7 @@ pub fn generate_entity_token_stream(derive_input: &DeriveInput) -> TokenStream {
   quote! {
     #(#new_value_types)*
     #[derive(crcnt_ddd_macros::Domain, Debug, Clone)]
-    #[domain_commands(builder)]
+    #[domain_commands(builder, getter_setter)]
     pub struct #entity_ident {
       #(#field_token_streams)*
     }

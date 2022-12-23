@@ -8,6 +8,7 @@ pub enum Command {
   GenValues,
   GenStore,
   GenBuilder,
+  GenGetterSetter,
 }
 
 impl Command {
@@ -46,6 +47,7 @@ impl syn::parse::Parser for CommandsParser {
                                     | "value" => GenValue,
                                     | "store" => GenStore,
                                     | "builder" => GenBuilder,
+                                    | "getter_setter" => GenGetterSetter,
                                     | x => panic!("domain_commands can only be: entity, values, value, store, but the input is {}", x),
                                   })
                                   .collect::<Vec<_>>();
@@ -56,9 +58,11 @@ impl syn::parse::Parser for CommandsParser {
 
 mod builder;
 mod entity;
+mod getter_setter;
 mod value;
 
 pub use {builder::BuilderMeta,
          entity::EntityMeta,
+         getter_setter::GetterSetterMeta,
          value::{ValueImpl,
                  ValueMeta}};

@@ -4,6 +4,7 @@ use {crate::attributes::Command,
 
 mod gen_builder;
 mod gen_entity;
+mod gen_getter_setter;
 mod gen_value;
 
 pub fn generate(command: &Command, derive_input: &DeriveInput) -> TokenStream {
@@ -11,6 +12,7 @@ pub fn generate(command: &Command, derive_input: &DeriveInput) -> TokenStream {
     | Command::GenValue => gen_value::generate_value_token_stream(derive_input),
     | Command::GenEntity => gen_entity::generate_entity_token_stream(derive_input),
     | Command::GenBuilder => gen_builder::generate_builder(derive_input),
+    | Command::GenGetterSetter => gen_getter_setter::generate_getter_setter(derive_input),
     | _ => todo!(),
   }
 }
