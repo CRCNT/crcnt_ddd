@@ -1,7 +1,6 @@
 use {proc_macro2::TokenStream,
      quote::ToTokens,
-     serde::{de::DeserializeOwned,
-             Deserialize},
+     serde::de::DeserializeOwned,
      syn::spanned::Spanned};
 
 pub fn parse_attr_token_stream<T: DeserializeOwned>(tokens_stream: TokenStream) -> syn::Result<T> {

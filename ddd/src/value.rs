@@ -46,6 +46,8 @@ impl CreateAt {
   pub fn timestamp(&self) -> i64 { *&self.0.0.timestamp() }
 
   pub fn timestamp_millis(&self) -> i64 { *&self.0.0.timestamp_millis() }
+
+  pub fn naive_date_time(&self) -> NaiveDateTime { self.0.0.naive_utc() }
 }
 
 impl AvailableSince {
@@ -65,6 +67,8 @@ impl AvailableSince {
     let now = Utc::now();
     &self.0.0 <= &now
   }
+
+  pub fn naive_date_time(&self) -> NaiveDateTime { self.0.0.naive_utc() }
 }
 
 impl ExpiredSince {
@@ -84,6 +88,8 @@ impl ExpiredSince {
     let now = Utc::now();
     &self.inner().0 <= &now
   }
+
+  pub fn naive_date_time(&self) -> NaiveDateTime { self.0.0.naive_utc() }
 }
 
 impl UpdateAt {
@@ -92,6 +98,8 @@ impl UpdateAt {
   pub fn timestamp(&self) -> i64 { *&self.0.0.timestamp() }
 
   pub fn timestamp_millis(&self) -> i64 { *&self.0.0.timestamp_millis() }
+
+  pub fn naive_date_time(&self) -> NaiveDateTime { self.0.0.naive_utc() }
 }
 
 impl From<&UtcDateTime> for Value {
@@ -231,4 +239,23 @@ impl FromValue for Creator {
 }
 impl FromValue for Updater {
   type Intermediate = StrIr;
+}
+impl From<&CreateAt> for Value {
+  fn from(x: &CreateAt) -> Self { Value::from(x.naive_date_time()) }
+}
+
+impl From<&UpdateAt> for Value {
+  fn from(x: &UpdateAt) -> Self { Value::from(x.naive_date_time()) }
+}
+
+impl From<&Deleted> for Value {
+  fn from(x: &Deleted) -> Self { Value::from(x.0) }
+}
+
+impl From<&Creator> for Value {
+  fn from(x: &Creator) -> Self { Value::from(x.inner()) }
+}
+
+impl From<&Updater> for Value {
+  fn from(x: &Updater) -> Self { Value::from(x.inner()) }
 }

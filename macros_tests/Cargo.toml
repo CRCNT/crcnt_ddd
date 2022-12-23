@@ -17,6 +17,10 @@ thiserror = "1.0"
 tracing = "0.1"
 typed-builder = "0.11"
 
+[dependencies.tracing-subscriber]
+version = "0.3"
+features = ["env-filter", "time", "local-time"]
+
 [dependencies.mysql_common]
 version = "0.29"
 features = ["chrono"]

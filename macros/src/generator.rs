@@ -7,6 +7,7 @@ mod gen_entity;
 mod gen_getter_setter;
 mod gen_store;
 mod gen_value;
+mod util;
 
 pub fn generate(command: &Command, derive_input: &DeriveInput) -> TokenStream {
   match command {
