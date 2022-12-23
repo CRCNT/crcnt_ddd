@@ -1,14 +1,14 @@
-use {crate::attributes::{ValueAttr,
-                         ValueImpl},
+use {crate::attributes::{ValueImpl,
+                         ValueMeta},
      proc_macro2::TokenStream,
      quote::quote,
      syn::DeriveInput};
 
 pub fn generate_value_token_stream(derive_input: &DeriveInput) -> TokenStream {
-  let value_attr = ValueAttr::parse(derive_input);
+  let value_attr = ValueMeta::parse(derive_input);
   dbg!(&value_attr);
 
-  let ValueAttr { ident,
+  let ValueMeta { ident,
                   impls,
                   is_enum,
                   inner_ident,
@@ -78,14 +78,6 @@ pub fn generate_value_token_stream(derive_input: &DeriveInput) -> TokenStream {
                                                              }
                                                            })
                                                            .collect::<Vec<_>>();
-                            let match_lines = enum_items.iter()
-                                                        .map(|item| {
-                                                          let item_str = item.to_string();
-                                                          quote! {
-                                                            #item_str => #item,
-                                                          }
-                                                        })
-                                                        .collect::<Vec<_>>();
                             let from_impl = if is_enum {
                               quote! {
                                 impl <'a> TryFrom<&'a str> for #ident {

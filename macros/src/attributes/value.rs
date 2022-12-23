@@ -2,13 +2,12 @@ use {proc_macro2::{Ident,
                    TokenStream},
      quote::{format_ident,
              ToTokens},
-     syn::{Attribute,
-           Data,
+     syn::{Data,
            DeriveInput,
            Fields}};
 
 #[derive(Debug, Clone)]
-pub struct ValueAttr {
+pub struct ValueMeta {
   pub ident:       Ident,
   pub impls:       Vec<ValueImpl>,
   pub is_enum:     bool,
@@ -16,7 +15,7 @@ pub struct ValueAttr {
   pub enum_items:  Vec<Ident>,
 }
 
-impl ValueAttr {
+impl ValueMeta {
   pub fn parse(derive_input: &DeriveInput) -> Self {
     let attrs = &derive_input.attrs;
     let impls = attrs.iter()
@@ -64,7 +63,7 @@ impl ValueAttr {
       }
       | Data::Union(_) => panic!("Value can be only on Struct and Enum"),
     };
-    ValueAttr { impls,
+    ValueMeta { impls,
                 ident,
                 is_enum,
                 inner_ident,

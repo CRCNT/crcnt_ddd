@@ -1,5 +1,4 @@
-use {crate::attributes::Command::GenEntity,
-     proc_macro2::TokenStream,
+use {proc_macro2::TokenStream,
      syn::DeriveInput};
 
 #[derive(Debug, Clone, PartialOrd, PartialEq)]
@@ -8,6 +7,7 @@ pub enum Command {
   GenEntity,
   GenValues,
   GenStore,
+  GenBuilder,
 }
 
 impl Command {
@@ -45,6 +45,7 @@ impl syn::parse::Parser for CommandsParser {
                                     | "values" => GenValues,
                                     | "value" => GenValue,
                                     | "store" => GenStore,
+                                    | "builder" => GenBuilder,
                                     | x => panic!("domain_commands can only be: entity, values, value, store, but the input is {}", x),
                                   })
                                   .collect::<Vec<_>>();
@@ -53,6 +54,11 @@ impl syn::parse::Parser for CommandsParser {
   }
 }
 
+mod builder;
+mod entity;
 mod value;
-pub use value::{ValueAttr,
-                ValueImpl};
+
+pub use {builder::BuilderMeta,
+         entity::EntityMeta,
+         value::{ValueImpl,
+                 ValueMeta}};
