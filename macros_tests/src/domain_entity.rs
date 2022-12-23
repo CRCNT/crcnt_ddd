@@ -64,8 +64,9 @@ mod test_domain {
   // }
 
   #[derive(Domain)]
-  #[domain_commands(entity)]
+  #[domain_commands(entity, store)]
   #[domain_entity(rename = "PersonEntityV1", value_type_prefix = "PE")]
+  #[domain_store(rename = "PersonMysql", table_name = "t_my_fav_rice", features = "sql_statement|sql_methods")]
   struct __Person__ {
     id:        String,
     #[domain_value(optional = true, skip_new_type = true)]
@@ -80,13 +81,17 @@ mod test_domain {
     deleted:   Deleted,
   }
 
-  // #[derive(TypedBuilder)]
-  // struct TestPublic {
-  //   a: String,
-  //   b: String,
-  //   c: String,
-  // }
+  #[derive(TypedBuilder)]
+  struct TestPublic {
+    a: String,
+    b: String,
+    c: String,
+  }
 }
+
+struct MyStore;
+
+impl PersonMysqlStmt for MyStore {}
 
 #[tokio::test]
 async fn test_entity() -> Result<()> {
@@ -108,6 +113,8 @@ async fn test_entity() -> Result<()> {
   let name = ent.ref_name();
   println!("id = {:?}", id.inner());
   println!("name = {:?}", name);
+
+  println!("sql = {}", MyStore::stmt_delete_by_id_person_entity_v_1());
   Ok(())
 }
 

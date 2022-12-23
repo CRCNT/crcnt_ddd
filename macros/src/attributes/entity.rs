@@ -131,14 +131,7 @@ impl EntityMeta {
 impl syn::parse::Parser for EntityAttrParser {
   type Output = EntityAttr;
 
-  fn parse2(self, tokens: TokenStream) -> syn::Result<Self::Output> {
-    toml::from_str(tokens.to_string().split(",").collect::<Vec<_>>().join("\n").as_str()).map_err(|e| {
-                                                                                           syn::Error::new(tokens.span(),
-                                                                                                           format!("domain_entity attributes \
-                                                                                                                    should be like TOML: {}",
-                                                                                                                   e.to_string()))
-                                                                                         })
-  }
+  fn parse2(self, tokens: TokenStream) -> syn::Result<Self::Output> { super::util::parse_attr_token_stream(tokens) }
 }
 
 impl EntityAttr {
@@ -165,14 +158,7 @@ impl EntityAttr {
 impl syn::parse::Parser for EntityFieldAttrParser {
   type Output = EntityFieldAttr;
 
-  fn parse2(self, tokens: TokenStream) -> syn::Result<Self::Output> {
-    toml::from_str(tokens.to_string().split(",").collect::<Vec<_>>().join("\n").as_str()).map_err(|e| {
-                                                                                           syn::Error::new(tokens.span(),
-                                                                                                           format!("domain_value attributes should \
-                                                                                                                    be like TOML: {}",
-                                                                                                                   e.to_string()))
-                                                                                         })
-  }
+  fn parse2(self, tokens: TokenStream) -> syn::Result<Self::Output> { super::util::parse_attr_token_stream(tokens) }
 }
 
 impl EntityFields {

@@ -8,7 +8,7 @@ use {crate::attributes::Command,
 mod attributes;
 mod generator;
 
-#[proc_macro_derive(Domain, attributes(domain_commands, domain_value_impl, domain_entity, domain_value))]
+#[proc_macro_derive(Domain, attributes(domain_commands, domain_value_impl, domain_entity, domain_value, domain_store))]
 pub fn domain_macro(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
   let derive_input = parse_macro_input!(input as DeriveInput);
   let commands = Command::commands(&derive_input);

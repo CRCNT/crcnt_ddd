@@ -59,10 +59,13 @@ impl syn::parse::Parser for CommandsParser {
 mod builder;
 mod entity;
 mod getter_setter;
+mod store;
+mod util;
 mod value;
 
 pub use {builder::BuilderMeta,
          entity::EntityMeta,
          getter_setter::GetterSetterMeta,
+         store::StoreMeta,
          value::{ValueImpl,
                  ValueMeta}};
