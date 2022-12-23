@@ -1,4 +1,8 @@
-use anyhow::Result;
+use {crate::domain_entity::test_domain::*,
+     anyhow::Result,
+     crcnt_ddd::value::{CreateAt,
+                        Deleted,
+                        UpdateAt}};
 
 mod test_macro {
   #[allow(unused_macros)]
@@ -31,20 +35,20 @@ mod test_domain {
        crcnt_ddd_macros::Domain,
        typed_builder::TypedBuilder};
 
-  #[derive(Domain, Debug)]
-  #[domain_commands(builder)]
-  pub struct PersonEntity {
-    id:   String,
-    name: String,
-    desc: Option<String>,
-  }
-
-  #[derive(TypedBuilder)]
-  pub struct CustomerEntity {
-    id:   String,
-    name: String,
-    desc: Option<String>,
-  }
+  // #[derive(Domain, Debug)]
+  // #[domain_commands(builder)]
+  // pub struct PersonEntity {
+  //   id:   String,
+  //   name: String,
+  //   desc: Option<String>,
+  // }
+  //
+  // #[derive(TypedBuilder)]
+  // pub struct CustomerEntity {
+  //   id:   String,
+  //   name: String,
+  //   desc: Option<String>,
+  // }
 
   // #[derive(Domain, Debug, Clone)]
   // #[domain_commands(value)]
@@ -59,42 +63,43 @@ mod test_domain {
   //   Inactive,
   // }
 
-  // #[derive(Domain)]
-  // #[domain_commands(entity)]
-  // #[domain_entity(rename = "PersonEntityV1", value_type_prefix = "PE")]
-  // struct __Person__ {
-  //   id:        String,
-  //   #[domain_value(optional = true, skip_new_type = true)]
-  //   name:      String,
-  //   #[domain_value(optional = true)]
-  //   age:       u32,
-  //   #[domain_value(enums = "Active|Inactive")]
-  //   status:    String,
-  //   create_at: CreateAt,
-  //   update_at: UpdateAt,
-  //   deleted:   Deleted,
-  // }
+  #[derive(Domain)]
+  #[domain_commands(entity)]
+  #[domain_entity(rename = "PersonEntityV1", value_type_prefix = "PE")]
+  struct __Person__ {
+    id:        String,
+    #[domain_value(optional = true, skip_new_type = true)]
+    name:      String,
+    #[domain_value(optional = true)]
+    age:       u32,
+    #[domain_value(enums = "Active|Inactive")]
+    status:    String,
+    create_at: CreateAt,
+    update_at: UpdateAt,
+    deleted:   Deleted,
+  }
 
-  // domain_value!(MyName, String);
-  // impl<'a> TryFrom<&'a str> for Status {
-  // type Error = String;
-  //
-  // fn try_from(value: &'a str) -> std::result::Result<Self, Self::Error> {
-  // use Status::*;
-  // match value {
-  // | x => Err(format!("{}", x)),
-  // }
-  // }
+  // #[derive(TypedBuilder)]
+  // struct TestPublic {
+  //   a: String,
+  //   b: String,
+  //   c: String,
   // }
 }
-use test_domain::PersonEntity;
+
 #[tokio::test]
 async fn test_entity() -> Result<()> {
-  let person_entity = PersonEntity::builder().build();
-  //.build();
-  // let builder = BTestBuilder::builder();
-  // let bt = builder.id("1".to_string()).id("2".to_string()).age(40).build("hello".to_string());
-  println!("{:?}", person_entity);
+  let ent = PersonEntityV1::builder().id("peid".into())
+                                     .name(Some("zenas".into()))
+                                     .age(Some(10u32.into()))
+                                     .status(PEStatus::Active)
+                                     .create_at(CreateAt::now().into())
+                                     .update_at(UpdateAt::now().into())
+                                     .deleted(Deleted::new(true).into())
+                                     .build();
+  let new_id = PEId::new("2");
+  println!("ent: {:?}", ent);
+  eprintln!("new_id: {:?}", new_id);
   Ok(())
 }
 

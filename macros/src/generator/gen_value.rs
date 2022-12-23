@@ -6,7 +6,7 @@ use {crate::attributes::{ValueImpl,
 
 pub fn generate_value_token_stream(derive_input: &DeriveInput) -> TokenStream {
   let value_attr = ValueMeta::parse(derive_input);
-  dbg!(&value_attr);
+  // dbg!(&value_attr);
 
   let ValueMeta { ident,
                   impls,
@@ -65,6 +65,16 @@ pub fn generate_value_token_stream(derive_input: &DeriveInput) -> TokenStream {
                          })
                          .collect::<Vec<_>>();
 
+  let new_impls = if is_enum {
+    quote! {}
+  } else {
+    quote! {
+      pub fn new<T: Into<#inner_ident>>(value: T) -> Self {
+        Self(value.into())
+      }
+    }
+  };
+
   let from_impls = impls.iter()
                         .filter_map(|imp| {
                           if imp == &ValueImpl::From {
@@ -107,6 +117,7 @@ pub fn generate_value_token_stream(derive_input: &DeriveInput) -> TokenStream {
                         .collect::<Vec<_>>();
   quote! {
     impl #ident {
+      #new_impls
       #(#basic_impls)*
     }
 

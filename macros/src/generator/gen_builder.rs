@@ -33,7 +33,7 @@ pub fn generate_builder(derive_input: &DeriveInput) -> TokenStream {
                         }
                       })
                       .collect::<Vec<_>>();
-  let first_field = meta.fields.fields().first().map(|x| x.clone()).unwrap();
+  // let first_field = meta.fields.fields().first().map(|x| x.clone()).unwrap();
   let mut all_generics = meta.fields
                              .fields()
                              .iter()
@@ -85,7 +85,7 @@ pub fn generate_builder(derive_input: &DeriveInput) -> TokenStream {
                                let ty = &f.missed_tip_ty;
                                quote! {
                                  #[allow(dead_code, non_camel_case_types, missing_docs, clippy::panic)]
-                                 enum #ty {}
+                                 pub enum #ty {}
                                }
                              })
                              .collect::<Vec<_>>();

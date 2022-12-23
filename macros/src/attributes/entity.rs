@@ -74,8 +74,7 @@ pub struct EntityFieldAttr {
 }
 pub struct EntityFieldAttrParser;
 impl EntityFieldAttr {
-  pub fn parse(entity_attr: &ExactEntityAttr, attrs: &Vec<Attribute>) -> Self {
-    //
+  pub fn parse(_entity_attr: &ExactEntityAttr, attrs: &Vec<Attribute>) -> Self {
     let field_attrs = attrs.iter()
                            .filter_map(|attr| {
                              if let Some(_s) = attr.path.segments.iter().find(|s| s.ident == "domain_value") {

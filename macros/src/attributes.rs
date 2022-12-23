@@ -37,7 +37,7 @@ impl syn::parse::Parser for CommandsParser {
     use Command::*;
 
     let domain_commands = tokens.to_string();
-    dbg!(&domain_commands);
+    // dbg!(&domain_commands);
 
     let commands = domain_commands.split(",")
                                   .map(|x| match x.trim() {

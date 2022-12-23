@@ -1,8 +1,7 @@
 use {crate::attributes::EntityMeta,
      proc_macro2::TokenStream,
      quote::{format_ident,
-             quote,
-             ToTokens},
+             quote},
      syn::DeriveInput};
 
 pub fn generate_entity_token_stream(derive_input: &DeriveInput) -> TokenStream {
@@ -16,7 +15,7 @@ pub fn generate_entity_token_stream(derive_input: &DeriveInput) -> TokenStream {
                                        .map(|field| {
                                          let name_ident = format_ident!("{}", field.name);
                                          let ty = field.field_type(&entity_meta);
-                                         dbg!(&ty.to_token_stream().to_string());
+                                         // dbg!(&ty.to_token_stream().to_string());
                                          quote! {
                                            #name_ident: #ty,
                                          }

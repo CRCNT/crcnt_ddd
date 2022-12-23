@@ -55,7 +55,7 @@ impl ValueMeta {
         let variants = &data_enum.variants;
         let enum_items = variants.iter()
                                  .map(|v| {
-                                   dbg!(&v.ident);
+                                   // dbg!(&v.ident);
                                    v.ident.clone()
                                  })
                                  .collect::<Vec<_>>();
