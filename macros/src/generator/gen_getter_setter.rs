@@ -15,6 +15,7 @@ pub fn generate_getter_setter(derive_input: &DeriveInput) -> TokenStream {
                       let set_ident = format_ident!("set_{}", rt.ident);
                       let mv_ident = format_ident!("mv_{}", rt.ident);
                       let r_ty = &rt.ty;
+                      //<editor-fold desc="Getter && Setter Quotes">
                       quote! {
                         pub fn #ref_ident(&self) -> &#r_ty {
                           &self.#f_ident
@@ -29,6 +30,7 @@ pub fn generate_getter_setter(derive_input: &DeriveInput) -> TokenStream {
                           }
                         }
                       }
+                      //</editor-fold>
                     })
                     .collect::<Vec<_>>();
   quote! {
