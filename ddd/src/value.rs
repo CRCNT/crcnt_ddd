@@ -1,36 +1,43 @@
 use {chrono::{DateTime,
               NaiveDateTime,
               Utc},
-     crcnt_ddd_macros::DomainValue,
+     crcnt_ddd_macros::Domain,
      mysql_async::Value,
      mysql_common::value::convert::{ConvIr,
                                     FromValue,
                                     FromValueError}};
 
 /// CreateAt is a timestamp in milliseconds like it in Java
-#[derive(Debug, Clone, DomainValue)]
+#[derive(Debug, Clone, Domain)]
+#[domain_commands(value)]
 pub struct CreateAt(UtcDateTime);
 
 /// UpdateAt is a timestamp in milliseconds like it in Java
-#[derive(Debug, Clone, DomainValue)]
+#[derive(Debug, Clone, Domain)]
+#[domain_commands(value)]
 pub struct UpdateAt(UtcDateTime);
 
-#[derive(Debug, Clone, DomainValue)]
+#[derive(Debug, Clone, Domain)]
+#[domain_commands(value)]
 pub struct AvailableSince(UtcDateTime);
 
-#[derive(Debug, Clone, DomainValue)]
+#[derive(Debug, Clone, Domain)]
+#[domain_commands(value)]
 pub struct ExpiredSince(UtcDateTime);
 
 /// Deleted is a logic deletion flag
-#[derive(Debug, Clone, DomainValue)]
+#[derive(Debug, Clone, Domain)]
+#[domain_commands(value)]
 pub struct Deleted(bool);
 
 /// Creator
-#[derive(Debug, Clone, DomainValue)]
+#[derive(Debug, Clone, Domain)]
+#[domain_commands(value)]
 pub struct Creator(String);
 
 /// Updater
-#[derive(Debug, Clone, DomainValue)]
+#[derive(Debug, Clone, Domain)]
+#[domain_commands(value)]
 pub struct Updater(String);
 
 #[derive(Debug, Clone)]

@@ -6,7 +6,7 @@ homepage = "https://github.com/CRCNT/crcnt_ddd/tree/main/ddd"
 documentation = "https://github.com/CRCNT/crcnt_ddd/tree/main/ddd"
 repository = "https://github.com/CRCNT/crcnt_ddd/tree/main/ddd"
 readme = "README.md"
-version = "0.1.1"
+version = "0.2.0"
 edition = "2021"
 
 [lib]
@@ -15,7 +15,7 @@ path = "src/lib.rs"
 
 [dependencies]
 #crcnt_ddd_macros = {path = "../macros"}
-crcnt_ddd_macros = "0.1"
+crcnt_ddd_macros = "0.2"
 mysql_async = "0.31"
 chrono = "0.4"
 serde = {version = "1.0", features=["derive"]}
