@@ -1,0 +1,33 @@
+[package]
+license = "MIT OR Apache-2.0"
+name = "crcnt_muligo"
+description = "CRCNT Multi Languages Component"
+homepage = ""
+documentation = ""
+repository = ""
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+name = "crcnt_mulingo"
+path = "src/lib.rs"
+
+[dependencies]
+crcnt_ddd_macros = "0.2"
+#crcnt_ddd_macros = {path = "../macros"}
+crcnt_ddd = "0.2"
+#crcnt_ddd = {path = "../ddd"}
+mysql_async = "0.31"
+mysql_common = {version ="0.29", features = ["chrono"]}
+chrono = "0.4"
+tokio = {version ="1.23", features = ["full"]}
+anyhow = "1.0"
+thiserror = "1.0"
+async-trait = "0.1"
+tracing = "0.1"
+ulid = "1.0"
+
+[dev-dependencies]
+[dependencies.tracing-subscriber]
+version = "0.3"
+features = ["env-filter", "time", "local-time"]

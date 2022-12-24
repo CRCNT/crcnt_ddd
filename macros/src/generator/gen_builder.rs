@@ -84,6 +84,7 @@ pub fn generate_builder(derive_input: &DeriveInput) -> TokenStream {
                              .map(|f| {
                                let ty = &f.missed_tip_ty;
                                quote! {
+                                 #[doc(hidden)]
                                  #[allow(dead_code, non_camel_case_types, missing_docs, clippy::panic)]
                                  pub enum #ty {}
                                }
