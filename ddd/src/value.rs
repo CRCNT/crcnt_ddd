@@ -2,10 +2,10 @@ use {chrono::{DateTime,
               NaiveDateTime,
               Utc},
      crcnt_ddd_macros::Domain,
-     mysql_async::Value,
-     mysql_common::value::convert::{ConvIr,
-                                    FromValue,
-                                    FromValueError}};
+     mysql_common::value::{convert::{ConvIr,
+                                     FromValue,
+                                     FromValueError},
+                           Value}};
 
 /// CreateAt is a timestamp in milliseconds like it in Java
 #[derive(Debug, Clone, Domain)]
