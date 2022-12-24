@@ -29,7 +29,7 @@ The domain Application is the function entrance which need be initialized at fir
 ```rust
 use crcnt_mulingo::includes::Application;
 fn create_application() {
-  let pool: Pool = Pool::new("mysql://promo_user:promo_userpw@localhost:3306/promo");
+  let pool: Pool = Pool::new("mysql://<username>:<userpwd>@localhost:3306/promo");
   let application = Application::new(pool);
   application
 }

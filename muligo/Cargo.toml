@@ -5,7 +5,7 @@ description = "CRCNT Multi Languages Component"
 homepage = "https://github.com/CRCNT/crcnt_ddd/tree/main/muligo"
 documentation = "https://github.com/CRCNT/crcnt_ddd/tree/main/muligo"
 repository = "https://github.com/CRCNT/crcnt_ddd/tree/main/muligo"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 
 [lib]
