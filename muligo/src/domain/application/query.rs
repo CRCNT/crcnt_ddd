@@ -46,6 +46,6 @@ impl ApplicationQuery for Application {
                          lang_key: &MulingoLangKey,
                          version: &MulingoVersion)
                          -> Result<Option<MulingoEntity>> {
-    self.store.fetch_mulingo(owner, ns, version, msg_key, lang_key)
+    self.store.fetch_mulingo(owner, ns, version, msg_key, lang_key).await
   }
 }
