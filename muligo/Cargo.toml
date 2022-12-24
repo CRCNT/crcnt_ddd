@@ -2,9 +2,9 @@
 license = "MIT OR Apache-2.0"
 name = "crcnt_muligo"
 description = "CRCNT Multi Languages Component"
-homepage = ""
-documentation = ""
-repository = ""
+homepage = "https://github.com/CRCNT/crcnt_ddd/tree/main/muligo"
+documentation = "https://github.com/CRCNT/crcnt_ddd/tree/main/muligo"
+repository = "https://github.com/CRCNT/crcnt_ddd/tree/main/muligo"
 version = "0.1.0"
 edition = "2021"
 
