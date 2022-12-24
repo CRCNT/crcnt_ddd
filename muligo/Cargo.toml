@@ -13,8 +13,8 @@ name = "crcnt_mulingo"
 path = "src/lib.rs"
 
 [dependencies]
-#crcnt_ddd_macros = "0.2"
-crcnt_ddd_macros = {path = "../macros"}
+crcnt_ddd_macros = "0.2"
+#crcnt_ddd_macros = {path = "../macros"}
 crcnt_ddd = "0.2"
 #crcnt_ddd = {path = "../ddd"}
 mysql_async = "0.31"
