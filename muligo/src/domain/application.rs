@@ -1,4 +1,5 @@
-use {crate::domain::store::Store,
+use {crate::domain::{service::Service,
+                     store::Store},
      mysql_async::Pool};
 
 #[derive(Clone)]
@@ -16,6 +17,9 @@ impl Application {
 }
 
 mod create;
+mod query;
+mod update;
 
-use crate::domain::service::Service;
-pub use create::ApplicationCreate;
+pub use {create::ApplicationCreate,
+         query::ApplicationQuery,
+         update::ApplicationUpdate};

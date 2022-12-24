@@ -2,5 +2,6 @@
 members = [
     "macros",
     "macros_tests",
-    "ddd"
+    "ddd",
+    "muligo"
 ]
