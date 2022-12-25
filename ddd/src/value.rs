@@ -330,29 +330,5 @@ impl From<&UtcDateTime> for Value {
     Value::from(naive)
   }
 }
-impl From<&CreateAt> for Value {
-  fn from(x: &CreateAt) -> Self { Value::from(x.naive_date_time()) }
-}
 
-impl From<&UpdateAt> for Value {
-  fn from(x: &UpdateAt) -> Self { Value::from(x.naive_date_time()) }
-}
-
-impl From<&Deleted> for Value {
-  fn from(x: &Deleted) -> Self { Value::from(x.0) }
-}
-
-impl From<&Creator> for Value {
-  fn from(x: &Creator) -> Self { Value::from(x.inner()) }
-}
-
-impl From<&Updater> for Value {
-  fn from(x: &Updater) -> Self { Value::from(x.inner()) }
-}
-impl From<&Owner> for Value {
-  fn from(x: &Owner) -> Self { Value::from(x.inner()) }
-}
-impl From<&EntityId> for Value {
-  fn from(x: &EntityId) -> Self { Value::from(x.inner()) }
-}
 //</editor-fold>
