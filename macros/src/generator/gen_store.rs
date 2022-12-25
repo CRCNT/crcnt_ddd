@@ -156,9 +156,10 @@ pub fn generate_store(derive_input: &DeriveInput) -> TokenStream {
 
   let extract_params_tokens_stream = if let Some(fun) = meta.params_extractor {
     let src = format!("{}(&params)", fun);
-    TokenStream::from_str(src.as_str()).unwrap()
+    let tracing_debug = format!(r#"tracing::debug!("{{}}, {{}}", sql, {});"#, src);
+    TokenStream::from_str(tracing_debug.as_str()).unwrap()
   } else {
-    TokenStream::from_str("params").unwrap()
+    TokenStream::new()
   };
 
   let stmt_token_stream = quote! {
@@ -200,7 +201,7 @@ pub fn generate_store(derive_input: &DeriveInput) -> TokenStream {
         use mysql_async::prelude::{Query, WithParams};
         let sql = self.#stmt_insert_ident();
         let params = self.#entity_params_fn_name(entity);
-        tracing::debug!("{}, {}", sql, #extract_params_tokens_stream);
+        #extract_params_tokens_stream
         sql.with(params).ignore(conn).await
       }
       async fn #select_fn_name<'a, 't: 'a, C, S, T>(&self, condition: S, params: mysql_async::prelude::params::Params, conn: C) -> mysql_async::Result<Vec<T>>
@@ -212,7 +213,7 @@ pub fn generate_store(derive_input: &DeriveInput) -> TokenStream {
         let sql = self.#stmt_select_ident();
         let condition: String = condition.into();
         let sql = format!("{} {}", sql, condition);
-        tracing::debug!("{}, {}", sql, #extract_params_tokens_stream);
+        #extract_params_tokens_stream
         sql.with(params).fetch(conn).await
       }
 
@@ -224,7 +225,7 @@ pub fn generate_store(derive_input: &DeriveInput) -> TokenStream {
         let sql = self.#stmt_delete_ident();
         let condition: String = condition.into();
         let sql = format!("{} {}", sql, condition);
-        tracing::debug!("{}, {}", sql, #extract_params_tokens_stream);
+        #extract_params_tokens_stream
         sql.with(params).ignore(conn).await
       }
 
@@ -234,7 +235,7 @@ pub fn generate_store(derive_input: &DeriveInput) -> TokenStream {
         use mysql_async::prelude::{Query, WithParams, params};
         let sql = self.#stmt_delete_by_id_ident();
         let params = params! {"id" => id.inner()};
-        tracing::debug!("{}, {}", sql, #extract_params_tokens_stream);
+        #extract_params_tokens_stream
         sql.with(params).ignore(conn).await
       }
 
@@ -246,7 +247,7 @@ pub fn generate_store(derive_input: &DeriveInput) -> TokenStream {
         let sql = self.#stmt_select_ident();
         let sql = format!("{} WHERE id = :id", sql);
         let params = params! {"id" => id.inner()};
-        tracing::debug!("{}, {}", sql, #extract_params_tokens_stream);
+        #extract_params_tokens_stream
         sql.with(params).first(conn).await
       }
 
@@ -256,7 +257,7 @@ pub fn generate_store(derive_input: &DeriveInput) -> TokenStream {
         use mysql_async::prelude::{Query, WithParams};
         let sql = self.#stmt_update_by_id_ident();
         let params = self.#entity_params_fn_name(entity);
-        tracing::debug!("{}, {}", sql, #extract_params_tokens_stream);
+        #extract_params_tokens_stream
         sql.with(params).ignore(conn).await
       }
     }
