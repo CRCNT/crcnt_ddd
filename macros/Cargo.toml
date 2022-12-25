@@ -6,7 +6,7 @@ homepage = "https://github.com/CRCNT/crcnt_ddd/tree/main/macros"
 documentation = "https://github.com/CRCNT/crcnt_ddd/tree/main/macros"
 repository = "https://github.com/CRCNT/crcnt_ddd/tree/main/macros"
 readme = "README.md"
-version = "0.2.2"
+version = "0.2.3"
 edition = "2021"
 
 [lib]

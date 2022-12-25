@@ -62,6 +62,9 @@ pub fn generate_value_token_stream(derive_input: &DeriveInput) -> TokenStream {
                            | ValueImpl::From => {
                              quote! {}
                            }
+                           | ValueImpl::IntoMysqlValue => {
+                             quote! {}
+                           }
                          })
                          .collect::<Vec<_>>();
 
@@ -115,6 +118,19 @@ pub fn generate_value_token_stream(derive_input: &DeriveInput) -> TokenStream {
                           }
                         })
                         .collect::<Vec<_>>();
+
+  // into mysql value, From<&T> for Value
+  let into_mysql_value = if impls.iter().find(|x| x.eq(&&ValueImpl::IntoMysqlValue)).is_some() {
+    quote! {
+      impl From<&#ident> for mysql_common::value::Value {
+        fn from(x: &#ident) -> Self {
+          mysql_common::value::Value::from(x.inner())
+        }
+      }
+    }
+  } else {
+    quote! {}
+  };
   quote! {
     impl #ident {
       #new_impls
@@ -122,5 +138,7 @@ pub fn generate_value_token_stream(derive_input: &DeriveInput) -> TokenStream {
     }
 
     #(#from_impls)*
+
+    #into_mysql_value
   }
 }

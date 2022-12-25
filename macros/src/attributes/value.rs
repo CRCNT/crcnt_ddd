@@ -30,7 +30,7 @@ impl ValueMeta {
                      .collect::<Vec<_>>();
     let impls = impls.into_iter().flatten().collect::<Vec<_>>();
     let impls = if impls.is_empty() {
-      vec![ValueImpl::IntoInner, ValueImpl::Inner, ValueImpl::From]
+      vec![ValueImpl::IntoInner, ValueImpl::Inner, ValueImpl::From, ValueImpl::IntoMysqlValue]
     } else {
       impls
     };
@@ -76,6 +76,7 @@ pub enum ValueImpl {
   Inner,
   IntoInner,
   From,
+  IntoMysqlValue,
 }
 
 pub struct ValueImplParser;
@@ -90,6 +91,7 @@ impl syn::parse::Parser for ValueImplParser {
                      | "inner" => ValueImpl::Inner,
                      | "into_inner" => ValueImpl::IntoInner,
                      | "from" => ValueImpl::From,
+                     | "into_mysql_value" => ValueImpl::Inner,
                      | x => panic!("domain_value_impl can only be inner, into_inner, but found: {}", x),
                    })
                    .collect::<Vec<_>>();
