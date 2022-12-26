@@ -16,8 +16,9 @@ pub fn generate_value_token_stream(derive_input: &DeriveInput) -> TokenStream {
   let lines = enum_items.iter()
                         .map(|item| {
                           let value = item.to_string();
+
                           quote! {
-                            #ident => #value,
+                            #item => #value,
                           }
                         })
                         .collect::<Vec<_>>();
