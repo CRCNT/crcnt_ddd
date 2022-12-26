@@ -5,14 +5,16 @@
 ```mysql
 CREATE TABLE t_rbac_operator (
     id VARCHAR(32) PRIMARY KEY,
-    profile_id VARCHAR(32) NOT NULL,
+    profile_id VARCHAR(32) NULL,
     name VARCHAR(60) NOT NULL ,
     name_type VARCHAR(20) NOT NULL COMMENT 'NameType: LoginName, Email, Mobile',
     password VARCHAR(100) NOT NULL,
     status VARCHAR(20) NOT NULL COMMENT 'Status: Active|Inactive',
-    last_login_at TIMESTAMP NOT NULL,
+    last_login_at TIMESTAMP,
     failed_times INT(4) NOT NULL,
     owner VARCHAR(50) NOT NULL,
+    creator VARCHAR(32) NOT NULL,
+    updater VARCHAR(32) NOT NULL,
     create_at TIMESTAMP NOT NULL,
     update_at TIMESTAMP NOT NULL,
     deleted BOOL
@@ -79,7 +81,7 @@ CREATE TABLE t_rbac_role_feature (
 CREATE TABLE t_rbac_session (
     id VARCHAR(32) PRIMARY KEY,
     operator_id VARCHAR(32) NOT NULL,
-    data VARCHAR(2048) NOT NULL,
+    data VARCHAR(2048),
     login_at TIMESTAMP NOT NULL,
     last_hit_at TIMESTAMP NOT NULL,
     expire_at TIMESTAMP NOT NULL,
@@ -93,7 +95,7 @@ CREATE TABLE t_rbac_access (
     id VARCHAR(32) PRIMARY KEY,
     operator_id VARCHAR(32) NOT NULL,
     session_id VARCHAR(32) NOT NULL,
-    feature_id VARCHAR(32) NOT NULL,
+    feature_code VARCHAR(50) NOT NULL,
     control VARCHAR(20) NOT NULL COMMENT 'Control: Allowed,Forbidden',
     access_at TIMESTAMP NOT NULL,
     owner VARCHAR(50) NOT NULL

@@ -1,10 +1,12 @@
 use {crate::role::RoleId,
      crcnt_ddd::value::{CreateAt,
+                        Creator,
                         Deleted,
                         EntityId,
                         Owner,
                         StrIr,
                         UpdateAt,
+                        Updater,
                         UtcDateTime},
      crcnt_ddd_macros::Domain,
      mysql_common::value::{convert::{ConvIr,
@@ -18,17 +20,23 @@ use {crate::role::RoleId,
 #[domain_store(params_extractor = "crate::params_extractor", table_name = "t_rbac_operator")]
 struct __Operator__ {
   id:            EntityId,
+  #[domain_value(optional = true)]
   profile_id:    String,
   name:          String,
   #[domain_value(enums = "LoginName|Email|Mobile")]
   name_type:     String,
   password:      String,
-  #[domain_value(enums = "Active|Inactive")]
+  #[domain_value(enums = "Active|Inactive|NeedChangePwd")]
   status:        String,
+  #[domain_value(optional = true)]
   last_login_at: UtcDateTime,
   failed_times:  u8,
   #[domain_value(skip_new_type = true)]
   owner:         Owner,
+  #[domain_value(skip_new_type = true)]
+  creator:       Creator,
+  #[domain_value(skip_new_type = true)]
+  updater:       Updater,
   #[domain_value(skip_new_type = true)]
   create_at:     CreateAt,
   #[domain_value(skip_new_type = true)]
@@ -70,6 +78,10 @@ impl ConvIr<OperatorId> for StrIr {
   fn rollback(self) -> Value { Value::from(self.bytes) }
 }
 
+impl OperatorPassword {
+  pub fn change_me() -> Self { OperatorPassword::new("ChangeMe!") }
+}
+
 #[cfg(test)]
 mod test {
   use {super::*,
@@ -91,6 +103,8 @@ mod test {
                                             .last_login_at(UtcDateTime::now().into())
                                             .failed_times(0u8.into())
                                             .owner("CNT".into())
+                                            .creator("--".into())
+                                            .updater("--".into())
                                             .create_at(CreateAt::now())
                                             .update_at(UpdateAt::now())
                                             .deleted(true.into())

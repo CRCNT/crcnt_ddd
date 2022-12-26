@@ -17,6 +17,7 @@ struct __Session__ {
   id:          EntityId,
   #[domain_value(skip_new_type = true)]
   operator_id: OperatorId,
+  #[domain_value(optional = true)]
   data:        String,
   login_at:    UtcDateTime,
   last_hit_at: UtcDateTime,

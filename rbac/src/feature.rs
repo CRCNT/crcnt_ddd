@@ -52,3 +52,20 @@ impl ConvIr<FeatureId> for StrIr {
 
   fn rollback(self) -> Value { Value::from(self.bytes) }
 }
+
+impl FromValue for FeatureCode {
+  type Intermediate = StrIr;
+}
+impl ConvIr<FeatureCode> for StrIr {
+  fn new(v: Value) -> Result<Self, FromValueError> {
+    let bytes = Vec::<u8>::from_value_opt(v)?;
+    Ok(StrIr { bytes })
+  }
+
+  fn commit(self) -> FeatureCode {
+    let value = String::from_utf8_lossy(&self.bytes).to_string();
+    FeatureCode(value)
+  }
+
+  fn rollback(self) -> Value { Value::from(self.bytes) }
+}
