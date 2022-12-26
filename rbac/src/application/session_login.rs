@@ -4,16 +4,19 @@ use {crate::{application::Application,
                         OperatorPassword},
              service::{ServiceFactory,
                        ServiceVerify},
-             session::SessionEntity,
+             session::{SessionEntity,
+                       SessionId},
              store::{StoreCreate,
                      StoreDelete,
-                     StoreQuery}},
+                     StoreQuery,
+                     StoreUpdate}},
      async_trait::async_trait,
      crcnt_ddd::value::Owner};
 
 #[async_trait]
 pub trait ApplicationSessionLogin {
   async fn login_with_name_password(&self, owner: Owner, name: OperatorName, password: OperatorPassword) -> Result<SessionEntity>;
+  async fn hit_session(&self, session_id: &SessionId) -> Result<SessionEntity>;
 }
 
 #[async_trait]
@@ -28,6 +31,13 @@ impl ApplicationSessionLogin for Application {
     let session = self.service.create_session_entity(owner, operator.mv_id())?;
     // insert new session
     let _ = self.store.insert_session_entity(&session).await?;
+    Ok(session)
+  }
+
+  async fn hit_session(&self, session_id: &SessionId) -> Result<SessionEntity> {
+    let session = self.store.get_session(session_id).await?;
+    let session = self.service.hit_session_entity(session)?;
+    let _ = self.store.update_session_entity(&session).await?;
     Ok(session)
   }
 }

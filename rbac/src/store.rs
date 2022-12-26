@@ -45,7 +45,9 @@ impl SessionEntityCRUDExec for Store {}
 mod create;
 mod delete;
 mod query;
+mod update;
 
 pub use {create::StoreCreate,
          delete::StoreDelete,
-         query::StoreQuery};
+         query::StoreQuery,
+         update::StoreUpdate};

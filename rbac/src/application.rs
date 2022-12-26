@@ -1,6 +1,7 @@
 use {crate::{service::Service,
              store::Store},
      chrono::Duration,
+     crcnt_ddd_macros::Domain,
      mysql_async::Pool};
 
 #[derive(Clone, Domain)]
@@ -31,6 +32,5 @@ impl Application {
 mod operator_create;
 mod session_login;
 
-use crcnt_ddd_macros::Domain;
 pub use {operator_create::ApplicationCreate,
          session_login::ApplicationSessionLogin};

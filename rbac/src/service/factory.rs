@@ -9,6 +9,7 @@ use {crate::{error::Result,
                        ServiceHasher},
              session::{SessionEntity,
                        SessionExpireAt,
+                       SessionLastHitAt,
                        SessionLoginAt}},
      crcnt_ddd::value::{CreateAt,
                         Creator,
@@ -20,6 +21,7 @@ use {crate::{error::Result,
 pub trait ServiceFactory {
   fn create_operator_entity(&self, owner: Owner, creator: Creator, name: OperatorName, name_type: OperatorNameType) -> Result<OperatorEntity>;
   fn create_session_entity(&self, owner: Owner, operator_id: OperatorId) -> Result<SessionEntity>;
+  fn hit_session_entity(&self, session: SessionEntity) -> Result<SessionEntity>;
 }
 
 impl ServiceFactory for Service {
@@ -54,5 +56,12 @@ impl ServiceFactory for Service {
                                .expire_at(expire_at)
                                .owner(owner)
                                .build())
+  }
+
+  fn hit_session_entity(&self, session: SessionEntity) -> Result<SessionEntity> {
+    let now = UtcDateTime::now();
+    let expire = now.clone() + self.session_expiration.clone();
+    let session = session.set_last_hit_at(SessionLastHitAt::new(now.clone())).set_expire_at(expire.into());
+    Ok(session)
   }
 }

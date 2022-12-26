@@ -2,34 +2,16 @@ use {anyhow::Result,
      crcnt_ddd::value::Owner,
      crcnt_rbac::includes::{OperatorName,
                             OperatorPassword,
-                            OperatorStatus,
-                            RBACApplication,
                             RBACApplicationCreate,
                             RBACApplicationSessionLogin,
-                            RBACConfig,
                             SessionId},
-     mysql_async::Pool,
-     tracing::info,
-     tracing_subscriber::{fmt,
-                          layer::SubscriberExt,
-                          util::SubscriberInitExt,
-                          EnvFilter}};
+     tracing::info};
+
+mod initializer;
 
 #[tokio::test]
 async fn test_add_operator() -> Result<()> {
-  println!("{}", OperatorStatus::NeedChangePwd.inner());
-
-  tracing_subscriber::registry().with(fmt::Layer::default())
-                                .with(EnvFilter::new("warn,crcnt_rbac=debug,crcnt_mulingo=debug,test_admin=debug"))
-                                .try_init()
-                                .unwrap();
-
-  let pool: Pool = Pool::new("mysql://promo_user:promo_userpw@localhost:3306/promo?pool_min=5&pool_max=30");
-  let config = RBACConfig::builder().pool(pool)
-                                    .session_expiration(chrono::Duration::minutes(30))
-                                    .password_salt("A!B".into())
-                                    .build();
-  let app = RBACApplication::new(config);
+  let app = initializer::init();
 
   let owner = Owner::new("SYS");
   let name = OperatorName::new("admin");
@@ -44,5 +26,13 @@ async fn test_add_operator() -> Result<()> {
 
   info!("{:?}", operator);
 
+  Ok(())
+}
+
+#[tokio::test]
+async fn test_hit_session() -> Result<()> {
+  let app = initializer::init();
+  let session = app.hit_session(&SessionId::new("SS01GN78WFB8CRY39C3F1QF0DVGE")).await?;
+  info!("new session: {:?}", session);
   Ok(())
 }
