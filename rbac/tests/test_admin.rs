@@ -36,3 +36,18 @@ async fn test_hit_session() -> Result<()> {
   info!("new session: {:?}", session);
   Ok(())
 }
+
+#[tokio::test]
+async fn test_add_feature() -> Result<()> { todo!() }
+
+#[tokio::test]
+async fn test_add_role() -> Result<()> { todo!() }
+
+#[tokio::test]
+async fn test_set_role_features() -> Result<()> { todo!() }
+
+#[tokio::test]
+async fn test_set_role_operators() -> Result<()> { todo!() }
+
+#[tokio::test]
+async fn test_get_operator_features() -> Result<()> { todo!() }

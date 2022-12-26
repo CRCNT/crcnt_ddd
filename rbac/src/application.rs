@@ -29,8 +29,8 @@ impl Application {
   }
 }
 
-mod operator_create;
-mod session_login;
+mod operator_admin;
+mod session_admin;
 
-pub use {operator_create::ApplicationCreate,
-         session_login::ApplicationSessionLogin};
+pub use {operator_admin::ApplicationCreate,
+         session_admin::ApplicationSessionLogin};
