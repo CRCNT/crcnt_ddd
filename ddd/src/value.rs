@@ -1,11 +1,14 @@
 use {chrono::{DateTime,
+              Duration,
               NaiveDateTime,
               Utc},
      crcnt_ddd_macros::Domain,
      mysql_common::value::{convert::{ConvIr,
                                      FromValue,
                                      FromValueError},
-                           Value}};
+                           Value},
+     std::ops,
+     ulid::Ulid};
 
 //<editor-fold desc="CreateAt Def">
 /// CreateAt is a timestamp in milliseconds like it in Java
@@ -332,3 +335,19 @@ impl From<&UtcDateTime> for Value {
 }
 
 //</editor-fold>
+
+impl EntityId {
+  pub fn new_with_prefix<T: AsRef<str>>(prefix: T) -> Self {
+    let id = format!("{}{}", prefix.as_ref(), Ulid::new().to_string());
+    EntityId::new(id)
+  }
+}
+
+impl ops::Add<Duration> for UtcDateTime {
+  type Output = UtcDateTime;
+
+  fn add(self, rhs: Duration) -> Self::Output {
+    let dt = self.0 + rhs;
+    UtcDateTime(dt)
+  }
+}
