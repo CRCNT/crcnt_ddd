@@ -7,7 +7,8 @@ use {chrono::{DateTime,
                                      FromValue,
                                      FromValueError},
                            Value},
-     std::ops,
+     std::{cmp::Ordering,
+           ops},
      ulid::Ulid};
 
 //<editor-fold desc="CreateAt Def">
@@ -350,4 +351,17 @@ impl ops::Add<Duration> for UtcDateTime {
     let dt = self.0 + rhs;
     UtcDateTime(dt)
   }
+}
+
+impl ops::Sub for UtcDateTime {
+  type Output = Duration;
+
+  fn sub(self, rhs: Self) -> Self::Output { self.0 - rhs.0 }
+}
+
+impl PartialEq for UtcDateTime {
+  fn eq(&self, other: &Self) -> bool { (&self.0).eq(&other.0) }
+}
+impl PartialOrd for UtcDateTime {
+  fn partial_cmp(&self, other: &Self) -> Option<Ordering> { (&self.0).partial_cmp(&other.0) }
 }

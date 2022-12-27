@@ -36,6 +36,7 @@ impl ApplicationSessionAdmin for Application {
 
   async fn hit_session(&self, session_id: &SessionId) -> Result<SessionEntity> {
     let session = self.store.get_session(session_id).await?;
+    let _ = self.service.verify_session_expiration(&session)?;
     let session = self.service.hit_session_entity(session)?;
     let _ = self.store.update_session_entity(&session).await?;
     Ok(session)

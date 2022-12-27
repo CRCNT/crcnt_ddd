@@ -10,6 +10,9 @@ pub enum Error {
   #[error("Session Not Found")]
   SessionNotFound,
 
+  #[error("Session Expired")]
+  SessionExpired,
+
   #[error("Operator Not Found")]
   OperatorNotFound,
 

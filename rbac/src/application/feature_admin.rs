@@ -7,7 +7,8 @@ use {crate::{application::Application,
                        FeatureId,
                        FeatureName,
                        FeatureParentId},
-             service::ServiceFactory,
+             service::{ServiceFactory,
+                       ServiceVerify},
              session::SessionId,
              store::{StoreCreate,
                      StoreQuery}},
@@ -51,6 +52,7 @@ impl ApplicationFeatureAdmin for Application {
                                  -> Result<FeatureEntity> {
     // check the session
     let session = self.store.get_session(&session_id).await?;
+    let _ = self.service.verify_session_expiration(&session)?;
 
     // check if parent_id exists
     if let Some(ref parent_id) = parent_id {

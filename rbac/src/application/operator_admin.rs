@@ -23,6 +23,7 @@ impl ApplicationOperatorAdmin for Application {
   async fn create_operator_with_login_name(&self, session_id: SessionId, owner: Owner, name: OperatorName) -> Result<OperatorEntity> {
     // check the session
     let session = self.store.get_session(&session_id).await?;
+    let _ = self.service.verify_session_expiration(&session)?;
     // create the entity
     let creator: Creator = session.as_creator();
     let entity = self.service.create_operator_entity(owner, creator, name, OperatorNameType::LoginName)?;

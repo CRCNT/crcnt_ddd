@@ -38,7 +38,11 @@ async fn test_hit_session() -> Result<()> {
 }
 
 #[tokio::test]
-async fn test_add_feature() -> Result<()> { todo!() }
+async fn test_add_feature() -> Result<()> {
+  let app = initializer::init();
+
+  todo!()
+}
 
 #[tokio::test]
 async fn test_add_role() -> Result<()> { todo!() }
