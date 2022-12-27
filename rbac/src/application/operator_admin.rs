@@ -24,7 +24,7 @@ impl ApplicationOperatorAdmin for Application {
     // check the session
     let session = self.store.get_session(&session_id).await?;
     // create the entity
-    let creator: Creator = session.ref_operator_id().inner().inner().into();
+    let creator: Creator = session.as_creator();
     let entity = self.service.create_operator_entity(owner, creator, name, OperatorNameType::LoginName)?;
     debug!("created new operator: {:?}", entity);
     // verify the entity

@@ -84,6 +84,6 @@ impl StoreQuery for Store {
                                                                              &mut conn)
                                            .await
                                            .map_err(|e| DatabaseError(e.to_string()))?;
-    Ok(features.first().map | x | x.clone())
+    Ok(features.first().map(|x| x.clone()))
   }
 }

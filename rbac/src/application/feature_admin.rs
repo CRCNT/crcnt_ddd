@@ -8,6 +8,7 @@ use {crate::{application::Application,
                        FeatureName,
                        FeatureParentId},
              service::ServiceFactory,
+             session::SessionId,
              store::{StoreCreate,
                      StoreQuery}},
      async_trait::async_trait,
@@ -16,6 +17,7 @@ use {crate::{application::Application,
 #[async_trait]
 pub trait ApplicationFeatureAdmin {
   async fn create_feature_entity(&self,
+                                 session_id: SessionId,
                                  owner: Owner,
                                  parent_id: Option<FeatureParentId>,
                                  code: FeatureCode,
@@ -24,19 +26,22 @@ pub trait ApplicationFeatureAdmin {
                                  description: Option<FeatureDescription>)
                                  -> Result<FeatureEntity>;
   async fn create_top_feature_entity(&self,
+                                     session_id: SessionId,
                                      owner: Owner,
                                      code: FeatureCode,
                                      name: FeatureName,
                                      endpoint: Option<FeatureEndpoint>,
                                      description: Option<FeatureDescription>)
                                      -> Result<FeatureEntity> {
-    self.create_feature_entity(owner, None, code, name, endpoint, description).await
+    self.create_feature_entity(session_id, owner, None, code, name, endpoint, description)
+        .await
   }
 }
 
 #[async_trait]
 impl ApplicationFeatureAdmin for Application {
   async fn create_feature_entity(&self,
+                                 session_id: SessionId,
                                  owner: Owner,
                                  parent_id: Option<FeatureParentId>,
                                  code: FeatureCode,
@@ -44,6 +49,9 @@ impl ApplicationFeatureAdmin for Application {
                                  endpoint: Option<FeatureEndpoint>,
                                  description: Option<FeatureDescription>)
                                  -> Result<FeatureEntity> {
+    // check the session
+    let session = self.store.get_session(&session_id).await?;
+
     // check if parent_id exists
     if let Some(ref parent_id) = parent_id {
       let parent_feature_id: FeatureId = parent_id.inner().into();
@@ -54,7 +62,9 @@ impl ApplicationFeatureAdmin for Application {
     let _ = self.store.check_feature_code_duplicated(&code).await?;
 
     // create entity
-    let feature = self.service.create_feature_entity(owner, parent_id, code, name, endpoint, description)?;
+    let creator = session.as_creator();
+    let feature = self.service
+                      .create_feature_entity(owner, creator, parent_id, code, name, endpoint, description)?;
 
     // insert entity
     let _ = self.store.insert_feature_entity(&feature).await?;

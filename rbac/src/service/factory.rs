@@ -30,6 +30,7 @@ pub trait ServiceFactory {
   fn create_session_entity(&self, owner: Owner, operator_id: OperatorId) -> Result<SessionEntity>;
   fn create_feature_entity(&self,
                            owner: Owner,
+                           creator: Creator,
                            parent_id: Option<FeatureParentId>,
                            code: FeatureCode,
                            name: FeatureName,
@@ -75,6 +76,7 @@ impl ServiceFactory for Service {
 
   fn create_feature_entity(&self,
                            owner: Owner,
+                           creator: Creator,
                            parent_id: Option<FeatureParentId>,
                            code: FeatureCode,
                            name: FeatureName,
@@ -89,6 +91,8 @@ impl ServiceFactory for Service {
                                .description(description)
                                .status(FeatureStatus::Active)
                                .owner(owner)
+                               .creator(creator.inner().into())
+                               .updater(creator.inner().into())
                                .create_at(CreateAt::now())
                                .update_at(UpdateAt::now())
                                .deleted(false.into())

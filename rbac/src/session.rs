@@ -1,5 +1,6 @@
 use {crate::operator::OperatorId,
-     crcnt_ddd::value::{EntityId,
+     crcnt_ddd::value::{Creator,
+                        EntityId,
                         Owner,
                         StrIr,
                         UtcDateTime},
@@ -41,4 +42,8 @@ impl ConvIr<SessionId> for StrIr {
   }
 
   fn rollback(self) -> Value { Value::from(self.bytes) }
+}
+
+impl SessionEntity {
+  pub fn as_creator(&self) -> Creator { self.ref_operator_id().inner().inner().into() }
 }
