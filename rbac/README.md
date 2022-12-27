@@ -33,6 +33,8 @@ CREATE TABLE t_rbac_role (
     level INT(4) NOT NULL,
     status VARCHAR(20) NOT NULL COMMENT 'Status: Active|Inactive',
     owner VARCHAR(50) NOT NULL,
+    creator VARCHAR(32) NOT NULL,
+    updater VARCHAR(32) NOT NULL,
     create_at TIMESTAMP NOT NULL,
     update_at TIMESTAMP NOT NULL,
     deleted BOOL
@@ -64,7 +66,7 @@ CREATE TABLE t_rbac_operator_role (
     operator_id VARCHAR(32) NOT NULL,
     role_id VARCHAR(32) NOT NULL,
     owner VARCHAR(50) NOT NULL,
-    create_at TIMESTAMP NOT NULL
+    create_at TIMESTAMP NOT NULL,
 ) COMMENT 'the relation of operator and role for rbac module';
 ```
 

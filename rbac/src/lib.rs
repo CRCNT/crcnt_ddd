@@ -42,6 +42,7 @@ pub mod includes {
   pub use super::{application::{Application as RBACApplication,
                                 ApplicationFeatureAdmin as RBACApplicationFeatureAdmin,
                                 ApplicationOperatorAdmin as RBACApplicationOperatorAdmin,
+                                ApplicationRoleAdmin as RBACApplicationRoleAdmin,
                                 ApplicationSessionAdmin as RBACApplicationSessionAdmin,
                                 Config as RBACConfig},
                   feature::{FeatureCode,
@@ -52,6 +53,11 @@ pub mod includes {
                              OperatorNameType,
                              OperatorPassword,
                              OperatorStatus},
+                  role::{RoleCode,
+                         RoleDescription,
+                         RoleEntity,
+                         RoleLevel,
+                         RoleName},
                   session::{SessionEntity,
                             SessionId}};
 }

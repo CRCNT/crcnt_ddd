@@ -7,7 +7,11 @@ use {crate::initializer::login,
                             OperatorName,
                             RBACApplicationFeatureAdmin,
                             RBACApplicationOperatorAdmin,
+                            RBACApplicationRoleAdmin,
                             RBACApplicationSessionAdmin,
+                            RoleCode,
+                            RoleLevel,
+                            RoleName,
                             SessionId},
      tracing::info};
 
@@ -39,12 +43,11 @@ async fn test_add_feature() -> Result<()> {
   let app = initializer::init();
   let session = login(&app).await?;
 
-  let owner = Owner::new("SYS");
   let feature_code = FeatureCode::new("feature-admin");
   let feature_name = FeatureName::new("Feature Admin");
   let endpoint = None;
   let feature_description = FeatureDescription::new("a bunch of administration functions");
-  let feature = app.create_top_feature_entity(session.mv_id(), owner, feature_code, feature_name, endpoint, Some(feature_description))
+  let feature = app.create_top_feature(session.mv_id(), feature_code, feature_name, endpoint, Some(feature_description))
                    .await?;
 
   info!("created feature: {:?}", feature);
@@ -52,7 +55,18 @@ async fn test_add_feature() -> Result<()> {
 }
 
 #[tokio::test]
-async fn test_add_role() -> Result<()> { todo!() }
+async fn test_add_role() -> Result<()> {
+  let app = initializer::init();
+  let session = login(&app).await?;
+  let owner = Owner::new("PROMO");
+  let code: RoleCode = "SYS_ADMIN".into();
+  let name: RoleName = "system administrator".into();
+  let description = None;
+  let level = RoleLevel::new(0);
+  let role = app.create_role(session.mv_id(), owner, code, name, level, description).await?;
+  info!("created role: {:?}", role);
+  Ok(())
+}
 
 #[tokio::test]
 async fn test_set_role_features() -> Result<()> { todo!() }

@@ -16,35 +16,35 @@ use {crate::{application::Application,
 
 #[async_trait]
 pub trait ApplicationFeatureAdmin {
-  async fn create_feature_entity(&self,
-                                 session_id: SessionId,
-                                 parent_id: Option<FeatureParentId>,
-                                 code: FeatureCode,
-                                 name: FeatureName,
-                                 endpoint: Option<FeatureEndpoint>,
-                                 description: Option<FeatureDescription>)
-                                 -> Result<FeatureEntity>;
-  async fn create_top_feature_entity(&self,
-                                     session_id: SessionId,
-                                     code: FeatureCode,
-                                     name: FeatureName,
-                                     endpoint: Option<FeatureEndpoint>,
-                                     description: Option<FeatureDescription>)
-                                     -> Result<FeatureEntity> {
-    self.create_feature_entity(session_id, None, code, name, endpoint, description).await
+  async fn create_feature(&self,
+                          session_id: SessionId,
+                          parent_id: Option<FeatureParentId>,
+                          code: FeatureCode,
+                          name: FeatureName,
+                          endpoint: Option<FeatureEndpoint>,
+                          description: Option<FeatureDescription>)
+                          -> Result<FeatureEntity>;
+  async fn create_top_feature(&self,
+                              session_id: SessionId,
+                              code: FeatureCode,
+                              name: FeatureName,
+                              endpoint: Option<FeatureEndpoint>,
+                              description: Option<FeatureDescription>)
+                              -> Result<FeatureEntity> {
+    self.create_feature(session_id, None, code, name, endpoint, description).await
   }
 }
 
 #[async_trait]
 impl ApplicationFeatureAdmin for Application {
-  async fn create_feature_entity(&self,
-                                 session_id: SessionId,
-                                 parent_id: Option<FeatureParentId>,
-                                 code: FeatureCode,
-                                 name: FeatureName,
-                                 endpoint: Option<FeatureEndpoint>,
-                                 description: Option<FeatureDescription>)
-                                 -> Result<FeatureEntity> {
+  async fn create_feature(&self,
+                          session_id: SessionId,
+                          parent_id: Option<FeatureParentId>,
+                          code: FeatureCode,
+                          name: FeatureName,
+                          endpoint: Option<FeatureEndpoint>,
+                          description: Option<FeatureDescription>)
+                          -> Result<FeatureEntity> {
     // check the session
     let session = self.store.get_session(&session_id).await?;
     let _ = self.service.verify_session_availability(&session)?;

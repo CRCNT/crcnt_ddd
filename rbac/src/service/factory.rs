@@ -13,6 +13,12 @@ use {crate::{error::Result,
                         OperatorNameType,
                         OperatorPassword,
                         OperatorStatus},
+             role::{RoleCode,
+                    RoleDescription,
+                    RoleEntity,
+                    RoleLevel,
+                    RoleName,
+                    RoleStatus},
              service::{Service,
                        ServiceHasher},
              session::{SessionEntity,
@@ -37,6 +43,14 @@ pub trait ServiceFactory {
                            endpoint: Option<FeatureEndpoint>,
                            description: Option<FeatureDescription>)
                            -> Result<FeatureEntity>;
+  fn create_role_entity(&self,
+                        owner: Owner,
+                        creator: Creator,
+                        code: RoleCode,
+                        name: RoleName,
+                        level: RoleLevel,
+                        description: Option<RoleDescription>)
+                        -> Result<RoleEntity>;
   fn hit_session_entity(&self, session: SessionEntity) -> Result<SessionEntity>;
   fn increase_operator_failed_times(&self, operator: OperatorEntity) -> OperatorEntity {
     let failed_times: OperatorFailedTimes = OperatorFailedTimes::new(*(operator.ref_failed_times().inner()) + 1);
@@ -99,6 +113,29 @@ impl ServiceFactory for Service {
                                .update_at(UpdateAt::now())
                                .deleted(false.into())
                                .build())
+  }
+
+  fn create_role_entity(&self,
+                        owner: Owner,
+                        creator: Creator,
+                        code: RoleCode,
+                        name: RoleName,
+                        level: RoleLevel,
+                        description: Option<RoleDescription>)
+                        -> Result<RoleEntity> {
+    Ok(RoleEntity::builder().id(EntityId::new_with_prefix("RL").into())
+                            .code(code)
+                            .name(name)
+                            .description(description)
+                            .level(level)
+                            .status(RoleStatus::Active)
+                            .creator(creator.inner().into())
+                            .updater(creator.inner().into())
+                            .owner(owner)
+                            .create_at(CreateAt::now())
+                            .update_at(UpdateAt::now())
+                            .deleted(false.into())
+                            .build())
   }
 
   fn hit_session_entity(&self, session: SessionEntity) -> Result<SessionEntity> {

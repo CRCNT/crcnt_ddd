@@ -1,10 +1,12 @@
 use {crate::feature::FeatureId,
      crcnt_ddd::value::{CreateAt,
+                        Creator,
                         Deleted,
                         EntityId,
                         Owner,
                         StrIr,
-                        UpdateAt},
+                        UpdateAt,
+                        Updater},
      crcnt_ddd_macros::Domain,
      mysql_common::value::{convert::{ConvIr,
                                      FromValue,
@@ -26,6 +28,10 @@ struct __Role__ {
   status:      String,
   #[domain_value(skip_new_type = true)]
   owner:       Owner,
+  #[domain_value(skip_new_type = true)]
+  creator:     Creator,
+  #[domain_value(skip_new_type = true)]
+  updater:     Updater,
   #[domain_value(skip_new_type = true)]
   create_at:   CreateAt,
   #[domain_value(skip_new_type = true)]
