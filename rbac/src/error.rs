@@ -16,6 +16,15 @@ pub enum Error {
   #[error("Operator Not Found")]
   OperatorNotFound,
 
+  #[error("Operator Inactive")]
+  OperatorInactive,
+
+  #[error("Operator Using Initial Password")]
+  OperatorNeedChangePassword,
+
+  #[error("Operator Login Failed Too Many Times")]
+  OperatorTooManyFailedLogin,
+
   #[error("Password Mismatched")]
   PasswordMismatch,
 

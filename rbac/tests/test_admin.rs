@@ -1,9 +1,13 @@
-use {anyhow::Result,
+use {crate::initializer::login,
+     anyhow::Result,
      crcnt_ddd::value::Owner,
-     crcnt_rbac::includes::{OperatorName,
-                            OperatorPassword,
-                            RBACApplicationCreate,
-                            RBACApplicationSessionLogin,
+     crcnt_rbac::includes::{FeatureCode,
+                            FeatureDescription,
+                            FeatureName,
+                            OperatorName,
+                            RBACApplicationFeatureAdmin,
+                            RBACApplicationOperatorAdmin,
+                            RBACApplicationSessionAdmin,
                             SessionId},
      tracing::info};
 
@@ -12,18 +16,11 @@ mod initializer;
 #[tokio::test]
 async fn test_add_operator() -> Result<()> {
   let app = initializer::init();
-
-  let owner = Owner::new("SYS");
+  let session = login(&app).await?;
+  let session_id: SessionId = session.ref_id().clone();
   let name = OperatorName::new("admin");
-  let password = OperatorPassword::new("passw0rd!");
-
-  let session = app.login_with_name_password(owner, name.clone(), password.clone()).await?;
-
-  let session: SessionId = session.ref_id().clone();
-
   let owner = Owner::new("PROMO");
-  let operator = app.create_operator_with_login_name(session, owner, name).await?;
-
+  let operator = app.create_operator_with_login_name(session_id, owner, name).await?;
   info!("{:?}", operator);
 
   Ok(())
@@ -40,8 +37,18 @@ async fn test_hit_session() -> Result<()> {
 #[tokio::test]
 async fn test_add_feature() -> Result<()> {
   let app = initializer::init();
+  let session = login(&app).await?;
 
-  todo!()
+  let owner = Owner::new("SYS");
+  let feature_code = FeatureCode::new("feature-admin");
+  let feature_name = FeatureName::new("Feature Admin");
+  let endpoint = None;
+  let feature_description = FeatureDescription::new("a bunch of administration functions");
+  let feature = app.create_top_feature_entity(session.mv_id(), owner, feature_code, feature_name, endpoint, Some(feature_description))
+                   .await?;
+
+  info!("created feature: {:?}", feature);
+  Ok(())
 }
 
 #[tokio::test]

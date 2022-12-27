@@ -7,9 +7,10 @@ use {crate::{service::Service,
 #[derive(Clone, Domain)]
 #[domain_commands(builder)]
 pub struct Config {
-  pool:               Pool,
-  session_expiration: Duration,
-  password_salt:      String,
+  pool:                      Pool,
+  session_expiration:        Duration,
+  password_salt:             String,
+  password_max_failed_times: u8,
 }
 
 #[derive(Clone)]
@@ -23,8 +24,9 @@ impl Application {
     let pool = config.pool;
 
     let store = Store { pool };
-    let service = Service { session_expiration: config.session_expiration,
-                            password_salt:      config.password_salt, };
+    let service = Service { session_expiration:        config.session_expiration,
+                            password_salt:             config.password_salt,
+                            password_max_failed_times: config.password_max_failed_times, };
     Self { store, service }
   }
 }

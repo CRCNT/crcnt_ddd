@@ -19,6 +19,8 @@ CREATE TABLE t_rbac_operator (
     update_at TIMESTAMP NOT NULL,
     deleted BOOL
 ) COMMENT 'operators for rbac module';
+-- the default password: passw0rd!
+INSERT INTO `t_rbac_operator` VALUES ('0','0','ROOT','LoginName','6d8e53b0ba388cb82e806b6c7539f98aef51babc52cc23e3d85df35ea6251444','Active','2022-12-27 12:04:46',0,'SYS','SYS','SYS','2022-12-27 12:05:13','2022-12-27 12:05:16',0);
 ```
 
 ### Role

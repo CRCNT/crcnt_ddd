@@ -7,6 +7,7 @@ use {crate::{error::Result,
                        FeatureParentId,
                        FeatureStatus},
              operator::{OperatorEntity,
+                        OperatorFailedTimes,
                         OperatorId,
                         OperatorName,
                         OperatorNameType,
@@ -38,6 +39,10 @@ pub trait ServiceFactory {
                            description: Option<FeatureDescription>)
                            -> Result<FeatureEntity>;
   fn hit_session_entity(&self, session: SessionEntity) -> Result<SessionEntity>;
+  fn increase_operator_failed_times(&self, operator: OperatorEntity) -> OperatorEntity {
+    let failed_times: OperatorFailedTimes = OperatorFailedTimes::new(*(operator.ref_failed_times().inner()) + 1);
+    operator.set_failed_times(failed_times).set_update_at(UpdateAt::now())
+  }
 }
 
 impl ServiceFactory for Service {

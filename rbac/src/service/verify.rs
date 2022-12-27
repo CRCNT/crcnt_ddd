@@ -1,6 +1,10 @@
-use {crate::{error::{Error::SessionExpired,
+use {crate::{error::{Error::{OperatorInactive,
+                             OperatorNeedChangePassword,
+                             OperatorTooManyFailedLogin,
+                             SessionExpired},
                      Result},
-             includes::OperatorPassword,
+             includes::{OperatorPassword,
+                        OperatorStatus},
              operator::OperatorEntity,
              service::{Service,
                        ServiceHasher},
@@ -10,12 +14,20 @@ use {crate::{error::{Error::SessionExpired,
 pub trait ServiceVerify {
   fn verify_operator_entity(&self, operator: &OperatorEntity) -> Result<()>;
   fn verify_operator_password(&self, operator: &OperatorEntity, password: &OperatorPassword) -> Result<()>;
-  fn verify_session_expiration(&self, session: &SessionEntity) -> Result<()>;
+  fn verify_session_availability(&self, session: &SessionEntity) -> Result<()>;
 }
 
 impl ServiceVerify for Service {
-  fn verify_operator_entity(&self, _operator: &OperatorEntity) -> Result<()> {
-    // FIXME: do the verification logic
+  fn verify_operator_entity(&self, operator: &OperatorEntity) -> Result<()> {
+    if &OperatorStatus::NeedChangePwd == operator.ref_status() {
+      return Err(OperatorNeedChangePassword);
+    }
+    if &OperatorStatus::Inactive == operator.ref_status() {
+      return Err(OperatorInactive);
+    }
+    if operator.ref_failed_times().inner() > &self.password_max_failed_times {
+      return Err(OperatorTooManyFailedLogin);
+    }
     Ok(())
   }
 
@@ -23,7 +35,7 @@ impl ServiceVerify for Service {
     self.sha256_verify_password(&self.password_salt, password, operator.ref_password())
   }
 
-  fn verify_session_expiration(&self, session: &SessionEntity) -> Result<()> {
+  fn verify_session_availability(&self, session: &SessionEntity) -> Result<()> {
     let expire = session.ref_expire_at().inner();
     let now = UtcDateTime::now();
 

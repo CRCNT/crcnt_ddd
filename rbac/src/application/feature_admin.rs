@@ -52,7 +52,7 @@ impl ApplicationFeatureAdmin for Application {
                                  -> Result<FeatureEntity> {
     // check the session
     let session = self.store.get_session(&session_id).await?;
-    let _ = self.service.verify_session_expiration(&session)?;
+    let _ = self.service.verify_session_availability(&session)?;
 
     // check if parent_id exists
     if let Some(ref parent_id) = parent_id {
