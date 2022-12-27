@@ -15,4 +15,10 @@ pub enum Error {
 
   #[error("Password Mismatched")]
   PasswordMismatch,
+
+  #[error("Feature Not Found")]
+  FeatureNotFound,
+
+  #[error("Feature Code Duplicated")]
+  FeatureCodeDuplicated,
 }

@@ -40,8 +40,8 @@ pub(crate) fn params_extractor(_params: &mysql_async::Params) -> String {
 
 pub mod includes {
   pub use super::{application::{Application as RBACApplication,
-                                ApplicationCreate as RBACApplicationCreate,
-                                ApplicationSessionLogin as RBACApplicationSessionLogin,
+                                ApplicationOperatorAdmin as RBACApplicationCreate,
+                                ApplicationSessionAdmin as RBACApplicationSessionLogin,
                                 Config as RBACConfig},
                   operator::{OperatorName,
                              OperatorNameType,

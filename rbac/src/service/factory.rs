@@ -1,4 +1,11 @@
 use {crate::{error::Result,
+             feature::{FeatureCode,
+                       FeatureDescription,
+                       FeatureEndpoint,
+                       FeatureEntity,
+                       FeatureName,
+                       FeatureParentId,
+                       FeatureStatus},
              operator::{OperatorEntity,
                         OperatorId,
                         OperatorName,
@@ -21,6 +28,14 @@ use {crate::{error::Result,
 pub trait ServiceFactory {
   fn create_operator_entity(&self, owner: Owner, creator: Creator, name: OperatorName, name_type: OperatorNameType) -> Result<OperatorEntity>;
   fn create_session_entity(&self, owner: Owner, operator_id: OperatorId) -> Result<SessionEntity>;
+  fn create_feature_entity(&self,
+                           owner: Owner,
+                           parent_id: Option<FeatureParentId>,
+                           code: FeatureCode,
+                           name: FeatureName,
+                           endpoint: Option<FeatureEndpoint>,
+                           description: Option<FeatureDescription>)
+                           -> Result<FeatureEntity>;
   fn hit_session_entity(&self, session: SessionEntity) -> Result<SessionEntity>;
 }
 
@@ -55,6 +70,28 @@ impl ServiceFactory for Service {
                                .last_hit_at(UtcDateTime::now().into())
                                .expire_at(expire_at)
                                .owner(owner)
+                               .build())
+  }
+
+  fn create_feature_entity(&self,
+                           owner: Owner,
+                           parent_id: Option<FeatureParentId>,
+                           code: FeatureCode,
+                           name: FeatureName,
+                           endpoint: Option<FeatureEndpoint>,
+                           description: Option<FeatureDescription>)
+                           -> Result<FeatureEntity> {
+    Ok(FeatureEntity::builder().id(EntityId::new_with_prefix("FT").into())
+                               .parent_id(parent_id)
+                               .code(code)
+                               .name(name)
+                               .endpoint(endpoint)
+                               .description(description)
+                               .status(FeatureStatus::Active)
+                               .owner(owner)
+                               .create_at(CreateAt::now())
+                               .update_at(UpdateAt::now())
+                               .deleted(false.into())
                                .build())
   }
 

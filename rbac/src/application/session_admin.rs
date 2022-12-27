@@ -14,13 +14,13 @@ use {crate::{application::Application,
      crcnt_ddd::value::Owner};
 
 #[async_trait]
-pub trait ApplicationSessionLogin {
+pub trait ApplicationSessionAdmin {
   async fn login_with_name_password(&self, owner: Owner, name: OperatorName, password: OperatorPassword) -> Result<SessionEntity>;
   async fn hit_session(&self, session_id: &SessionId) -> Result<SessionEntity>;
 }
 
 #[async_trait]
-impl ApplicationSessionLogin for Application {
+impl ApplicationSessionAdmin for Application {
   async fn login_with_name_password(&self, owner: Owner, name: OperatorName, password: OperatorPassword) -> Result<SessionEntity> {
     let operator = self.store.get_operator_by_name(&owner, &name).await?;
     // verify password

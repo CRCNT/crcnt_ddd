@@ -29,8 +29,10 @@ impl Application {
   }
 }
 
+mod feature_admin;
 mod operator_admin;
 mod session_admin;
 
-pub use {operator_admin::ApplicationCreate,
-         session_admin::ApplicationSessionLogin};
+pub use {feature_admin::ApplicationFeatureAdmin,
+         operator_admin::ApplicationOperatorAdmin,
+         session_admin::ApplicationSessionAdmin};

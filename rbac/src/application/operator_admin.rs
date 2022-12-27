@@ -14,12 +14,12 @@ use {crate::{application::Application,
      tracing::debug};
 
 #[async_trait]
-pub trait ApplicationCreate {
+pub trait ApplicationOperatorAdmin {
   async fn create_operator_with_login_name(&self, session_id: SessionId, owner: Owner, name: OperatorName) -> Result<OperatorEntity>;
 }
 
 #[async_trait]
-impl ApplicationCreate for Application {
+impl ApplicationOperatorAdmin for Application {
   async fn create_operator_with_login_name(&self, session_id: SessionId, owner: Owner, name: OperatorName) -> Result<OperatorEntity> {
     // check the session
     let session = self.store.get_session(&session_id).await?;
