@@ -1,4 +1,5 @@
-use {crate::{error::{Error::{OperatorInactive,
+use {crate::{error::{Error::{OperatorDeleted,
+                             OperatorInactive,
                              OperatorNeedChangePassword,
                              OperatorTooManyFailedLogin,
                              SessionExpired},
@@ -19,6 +20,9 @@ pub trait ServiceVerify {
 
 impl ServiceVerify for Service {
   fn verify_operator_entity(&self, operator: &OperatorEntity) -> Result<()> {
+    if *(operator.ref_deleted().inner()) {
+      return Err(OperatorDeleted);
+    }
     if &OperatorStatus::NeedChangePwd == operator.ref_status() {
       return Err(OperatorNeedChangePassword);
     }

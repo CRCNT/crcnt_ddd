@@ -19,6 +19,9 @@ pub enum Error {
   #[error("Operator Inactive")]
   OperatorInactive,
 
+  #[error("Operator Deleted")]
+  OperatorDeleted,
+
   #[error("Operator Using Initial Password")]
   OperatorNeedChangePassword,
 
