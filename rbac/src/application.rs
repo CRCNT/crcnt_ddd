@@ -33,8 +33,10 @@ impl Application {
 
 mod feature_admin;
 mod operator_admin;
+mod role_admin;
 mod session_admin;
 
 pub use {feature_admin::ApplicationFeatureAdmin,
          operator_admin::ApplicationOperatorAdmin,
+         role_admin::ApplicationRoleAdmin,
          session_admin::ApplicationSessionAdmin};

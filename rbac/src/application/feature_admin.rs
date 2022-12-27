@@ -12,14 +12,12 @@ use {crate::{application::Application,
              session::SessionId,
              store::{StoreCreate,
                      StoreQuery}},
-     async_trait::async_trait,
-     crcnt_ddd::value::Owner};
+     async_trait::async_trait};
 
 #[async_trait]
 pub trait ApplicationFeatureAdmin {
   async fn create_feature_entity(&self,
                                  session_id: SessionId,
-                                 owner: Owner,
                                  parent_id: Option<FeatureParentId>,
                                  code: FeatureCode,
                                  name: FeatureName,
@@ -28,14 +26,12 @@ pub trait ApplicationFeatureAdmin {
                                  -> Result<FeatureEntity>;
   async fn create_top_feature_entity(&self,
                                      session_id: SessionId,
-                                     owner: Owner,
                                      code: FeatureCode,
                                      name: FeatureName,
                                      endpoint: Option<FeatureEndpoint>,
                                      description: Option<FeatureDescription>)
                                      -> Result<FeatureEntity> {
-    self.create_feature_entity(session_id, owner, None, code, name, endpoint, description)
-        .await
+    self.create_feature_entity(session_id, None, code, name, endpoint, description).await
   }
 }
 
@@ -43,7 +39,6 @@ pub trait ApplicationFeatureAdmin {
 impl ApplicationFeatureAdmin for Application {
   async fn create_feature_entity(&self,
                                  session_id: SessionId,
-                                 owner: Owner,
                                  parent_id: Option<FeatureParentId>,
                                  code: FeatureCode,
                                  name: FeatureName,
@@ -66,7 +61,7 @@ impl ApplicationFeatureAdmin for Application {
     // create entity
     let creator = session.as_creator();
     let feature = self.service
-                      .create_feature_entity(owner, creator, parent_id, code, name, endpoint, description)?;
+                      .create_feature_entity(creator, parent_id, code, name, endpoint, description)?;
 
     // insert entity
     let _ = self.store.insert_feature_entity(&feature).await?;

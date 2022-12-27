@@ -2,7 +2,6 @@ use {crcnt_ddd::value::{CreateAt,
                         Creator,
                         Deleted,
                         EntityId,
-                        Owner,
                         StrIr,
                         UpdateAt,
                         Updater},
@@ -28,8 +27,6 @@ struct __Feature__ {
   description: String,
   #[domain_value(enums = "Active|Inactive")]
   status:      String,
-  #[domain_value(skip_new_type = true)]
-  owner:       Owner,
   #[domain_value(skip_new_type = true)]
   creator:     Creator,
   #[domain_value(skip_new_type = true)]
