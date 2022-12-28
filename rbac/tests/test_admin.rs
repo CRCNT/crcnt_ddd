@@ -3,6 +3,7 @@ use {crate::initializer::login,
      crcnt_ddd::value::Owner,
      crcnt_rbac::includes::{FeatureCode,
                             FeatureDescription,
+                            FeatureId,
                             FeatureName,
                             OperatorName,
                             RBACApplicationFeatureAdmin,
@@ -10,6 +11,7 @@ use {crate::initializer::login,
                             RBACApplicationRoleAdmin,
                             RBACApplicationSessionAdmin,
                             RoleCode,
+                            RoleId,
                             RoleLevel,
                             RoleName,
                             SessionId},
@@ -69,7 +71,17 @@ async fn test_add_role() -> Result<()> {
 }
 
 #[tokio::test]
-async fn test_set_role_features() -> Result<()> { todo!() }
+async fn test_set_role_features() -> Result<()> {
+  let app = initializer::init();
+  let session = login(&app).await?;
+
+  let role_id = RoleId::new("RL01GNA0AQ40BWT8A01B0BPAR80B");
+  let feature_id = FeatureId::new("FT01GN9QK37X45X9CS18NY5EZJDX");
+
+  let _ = app.set_role_features(session.mv_id(), role_id, vec![feature_id]).await?;
+
+  Ok(())
+}
 
 #[tokio::test]
 async fn test_set_role_operators() -> Result<()> { todo!() }

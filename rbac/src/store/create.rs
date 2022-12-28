@@ -5,7 +5,9 @@ use {crate::{error::{Error::DatabaseError,
              operator::{OperatorEntity,
                         OperatorEntityCRUDExec},
              role::{RoleEntity,
-                    RoleEntityCRUDExec},
+                    RoleEntityCRUDExec,
+                    RoleFeatureEntity,
+                    RoleFeatureEntityCRUDExec},
              session::{SessionEntity,
                        SessionEntityCRUDExec},
              store::Store},
@@ -19,6 +21,7 @@ pub trait StoreCreate {
   async fn insert_session_entity(&self, session: &SessionEntity) -> Result<()>;
   async fn insert_feature_entity(&self, feature: &FeatureEntity) -> Result<()>;
   async fn insert_role_entity(&self, role: &RoleEntity) -> Result<()>;
+  async fn insert_role_features(&self, role_features: Vec<RoleFeatureEntity>) -> Result<()>;
 }
 
 #[async_trait]
@@ -59,5 +62,20 @@ impl StoreCreate for Store {
     self.exec_insert_role_entity(role, &mut conn)
         .await
         .map_err(|e| DatabaseError(e.to_string()))
+  }
+
+  async fn insert_role_features(&self, role_features: Vec<RoleFeatureEntity>) -> Result<()> {
+    let mut conn = self.get_conn().await?;
+    let mut txn = conn.start_transaction(TxOpts::default())
+                      .await
+                      .map_err(|e| DatabaseError(e.to_string()))?;
+
+    for role_feature in role_features {
+      let _ = self.exec_insert_role_feature_entity(&role_feature, &mut txn)
+                  .await
+                  .map_err(|e| DatabaseError(e.to_string()))?;
+    }
+    let _ = txn.commit().await.map_err(|e| DatabaseError(e.to_string()))?;
+    Ok(())
   }
 }

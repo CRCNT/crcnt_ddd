@@ -16,6 +16,7 @@ use {crate::{error::Result,
              role::{RoleCode,
                     RoleDescription,
                     RoleEntity,
+                    RoleFeatureEntity,
                     RoleLevel,
                     RoleName,
                     RoleStatus},
@@ -51,6 +52,7 @@ pub trait ServiceFactory {
                         level: RoleLevel,
                         description: Option<RoleDescription>)
                         -> Result<RoleEntity>;
+  fn create_role_features(&self, session: &SessionEntity, role: RoleEntity, features: Vec<FeatureEntity>) -> Result<Vec<RoleFeatureEntity>>;
   fn hit_session_entity(&self, session: SessionEntity) -> Result<SessionEntity>;
   fn increase_operator_failed_times(&self, operator: OperatorEntity) -> OperatorEntity {
     let failed_times: OperatorFailedTimes = OperatorFailedTimes::new(*(operator.ref_failed_times().inner()) + 1);
@@ -136,6 +138,20 @@ impl ServiceFactory for Service {
                             .update_at(UpdateAt::now())
                             .deleted(false.into())
                             .build())
+  }
+
+  fn create_role_features(&self, session: &SessionEntity, role: RoleEntity, features: Vec<FeatureEntity>) -> Result<Vec<RoleFeatureEntity>> {
+    let owner = session.ref_owner();
+    Ok(features.iter()
+               .map(|feature| {
+                 RoleFeatureEntity::builder().id(EntityId::new_with_prefix("RF").into())
+                                             .role_id(role.ref_id().clone())
+                                             .feature_id(feature.ref_id().clone())
+                                             .owner(owner.clone())
+                                             .create_at(CreateAt::now())
+                                             .build()
+               })
+               .collect::<Vec<_>>())
   }
 
   fn hit_session_entity(&self, session: SessionEntity) -> Result<SessionEntity> {

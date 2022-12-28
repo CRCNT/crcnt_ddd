@@ -34,6 +34,9 @@ pub enum Error {
   #[error("Feature Not Found")]
   FeatureNotFound,
 
+  #[error("Role Not Found")]
+  RoleNotFound,
+
   #[error("Feature Code Duplicated")]
   FeatureCodeDuplicated,
 }

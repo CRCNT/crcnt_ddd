@@ -4,9 +4,12 @@ use {crate::{error::{Error::*,
                        FeatureEntity,
                        FeatureEntityCRUDExec,
                        FeatureId},
+             includes::RoleEntity,
              operator::{OperatorEntity,
                         OperatorEntityCRUDExec,
                         OperatorName},
+             role::{RoleEntityCRUDExec,
+                    RoleId},
              session::{SessionEntity,
                        SessionEntityCRUDExec,
                        SessionId},
@@ -21,6 +24,7 @@ pub trait StoreQuery {
   async fn find_operator(&self, owner: &Owner, name: &OperatorName) -> Result<Option<OperatorEntity>>;
   async fn get_feature(&self, feature_id: &FeatureId) -> Result<FeatureEntity>;
   async fn get_feature_by_code(&self, feature_code: &FeatureCode) -> Result<Option<FeatureEntity>>;
+  async fn get_role(&self, role_id: &RoleId) -> Result<RoleEntity>;
   async fn check_feature_code_duplicated(&self, feature_code: &FeatureCode) -> Result<()> {
     let feature = self.get_feature_by_code(feature_code).await?;
     if let Some(_feature) = feature {
@@ -32,6 +36,21 @@ pub trait StoreQuery {
   async fn get_operator_by_name(&self, owner: &Owner, name: &OperatorName) -> Result<OperatorEntity> {
     let xs = self.find_operator(owner, name).await?;
     if let Some(x) = xs { Ok(x) } else { Err(OperatorNotFound) }
+  }
+  async fn get_features(&self, feature_ids: Vec<FeatureId>) -> Result<Vec<FeatureEntity>> {
+    let features = feature_ids.iter().map(|x| async { self.get_feature(x).await }).collect::<Vec<_>>();
+    let features: Vec<Result<FeatureEntity>> = futures::future::join_all(features).await;
+    let init: Vec<FeatureEntity> = vec![];
+    let features = features.iter().fold(Ok(init), |acc, next| {
+                                    let acc = acc.and_then(|mut xs| {
+                                                   next.clone().map(|x| {
+                                                                 xs.push(x.clone());
+                                                                 xs
+                                                               })
+                                                 });
+                                    acc
+                                  });
+    features
   }
 }
 
@@ -85,5 +104,13 @@ impl StoreQuery for Store {
                                            .await
                                            .map_err(|e| DatabaseError(e.to_string()))?;
     Ok(features.first().map(|x| x.clone()))
+  }
+
+  async fn get_role(&self, role_id: &RoleId) -> Result<RoleEntity> {
+    let mut conn = self.get_conn().await?;
+    let role: Option<RoleEntity> = self.exec_get_role_entity(role_id, &mut conn)
+                                       .await
+                                       .map_err(|e| DatabaseError(e.to_string()))?;
+    if let Some(role) = role { Ok(role) } else { Err(RoleNotFound) }
   }
 }
