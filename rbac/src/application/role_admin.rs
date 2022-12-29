@@ -40,7 +40,7 @@ impl ApplicationRoleAdmin for Application {
                        -> Result<RoleEntity> {
     // check the session
     let session = self.store.get_session(&session_id).await?;
-    let _ = self.service.verify_session_availability(&session)?;
+    let _ = self.service.verify_normal_session_availability(&session)?;
     // create the entity
     let entity = self.service.create_role_entity(&session, code, name, level, description)?;
     // insert the entity
@@ -51,7 +51,7 @@ impl ApplicationRoleAdmin for Application {
   async fn set_role_features(&self, session_id: SessionId, role_id: RoleId, feature_ids: Vec<FeatureId>) -> Result<()> {
     // check the session
     let session = self.store.get_session(&session_id).await?;
-    let _ = self.service.verify_session_availability(&session)?;
+    let _ = self.service.verify_normal_session_availability(&session)?;
 
     // check the role id and feature ids.
     let role = self.store.get_role(&role_id).await?;
@@ -64,7 +64,7 @@ impl ApplicationRoleAdmin for Application {
   async fn set_role_operators(&self, session_id: SessionId, role_id: RoleId, operator_ids: Vec<OperatorId>) -> Result<()> {
     // check the session
     let session = self.store.get_session(&session_id).await?;
-    let _ = self.service.verify_session_availability(&session)?;
+    let _ = self.service.verify_normal_session_availability(&session)?;
 
     // check the role id and operator ids.
     let role = self.store.get_role(&role_id).await?;

@@ -21,7 +21,7 @@ impl ApplicationOperatorAdmin for Application {
   async fn create_operator_with_login_name(&self, session_id: SessionId, name: OperatorName) -> Result<OperatorEntity> {
     // check the session
     let session = self.store.get_session(&session_id).await?;
-    let _ = self.service.verify_session_availability(&session)?;
+    let _ = self.service.verify_normal_session_availability(&session)?;
 
     let _ = self.store.check_operator_duplicated(&name).await?;
     // create the entity

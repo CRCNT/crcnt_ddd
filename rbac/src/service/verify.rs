@@ -1,5 +1,6 @@
 use {crate::{error::{Error::{OperatorDeleted,
                              OperatorInactive,
+                             OperatorNeedChangePassword,
                              OperatorTooManyFailedLogin,
                              SessionExpired},
                      Result},
@@ -8,13 +9,14 @@ use {crate::{error::{Error::{OperatorDeleted,
              operator::OperatorEntity,
              service::{Service,
                        ServiceHasher},
-             session::SessionEntity},
+             session::{SessionEntity,
+                       SessionSessionType}},
      crcnt_ddd::value::UtcDateTime};
 
 pub trait ServiceVerify {
   fn verify_operator_availability(&self, operator: &OperatorEntity) -> Result<()>;
   fn verify_operator_password(&self, operator: &OperatorEntity, password: &OperatorPassword) -> Result<()>;
-  fn verify_session_availability(&self, session: &SessionEntity) -> Result<()>;
+  fn verify_normal_session_availability(&self, session: &SessionEntity) -> Result<()>;
 }
 
 impl ServiceVerify for Service {
@@ -35,15 +37,18 @@ impl ServiceVerify for Service {
     self.sha256_verify_password(&self.password_salt, password, operator.ref_password())
   }
 
-  fn verify_session_availability(&self, session: &SessionEntity) -> Result<()> {
+  fn verify_normal_session_availability(&self, session: &SessionEntity) -> Result<()> {
+    if session.ref_session_type() == &SessionSessionType::ChangePassword {
+      return Err(OperatorNeedChangePassword);
+    }
+
     let expire = session.ref_expire_at().inner();
     let now = UtcDateTime::now();
 
     if expire < &now {
       // expired
-      Err(SessionExpired)
-    } else {
-      Ok(())
+      return Err(SessionExpired);
     }
+    Ok(())
   }
 }

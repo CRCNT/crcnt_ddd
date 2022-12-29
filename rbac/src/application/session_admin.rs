@@ -43,7 +43,7 @@ impl ApplicationSessionAdmin for Application {
 
   async fn hit_session(&self, session_id: &SessionId) -> Result<SessionEntity> {
     let session = self.store.get_session(session_id).await?;
-    let _ = self.service.verify_session_availability(&session)?;
+    let _ = self.service.verify_normal_session_availability(&session)?;
     let session = self.service.hit_session_entity(session)?;
     let _ = self.store.update_session_entity(&session).await?;
     Ok(session)
@@ -52,7 +52,7 @@ impl ApplicationSessionAdmin for Application {
   async fn fetch_session_features(&self, session_id: &SessionId) -> Result<Vec<FeatureEntity>> {
     // find user's role
     let session = self.store.get_session(session_id).await?;
-    let _ = self.service.verify_session_availability(&session)?;
+    let _ = self.service.verify_normal_session_availability(&session)?;
 
     let operator_id = session.ref_operator_id();
     let role_ids = self.store.get_operator_role_ids(operator_id).await?;
