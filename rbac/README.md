@@ -87,6 +87,7 @@ CREATE TABLE t_rbac_session (
     id VARCHAR(32) PRIMARY KEY,
     operator_id VARCHAR(32) NOT NULL,
     data VARCHAR(2048),
+    session_type VARCHAR(20) NOT NULL COMMENT 'SessionType: ChangePassword, Normal',
     login_at TIMESTAMP NOT NULL,
     last_hit_at TIMESTAMP NOT NULL,
     expire_at TIMESTAMP NOT NULL,

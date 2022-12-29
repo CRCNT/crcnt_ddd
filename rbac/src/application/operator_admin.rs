@@ -23,7 +23,7 @@ impl ApplicationOperatorAdmin for Application {
     let session = self.store.get_session(&session_id).await?;
     let _ = self.service.verify_session_availability(&session)?;
 
-    let _ = self.store.check_operator_duplicated(session.ref_owner(), &name).await?;
+    let _ = self.store.check_operator_duplicated(&name).await?;
     // create the entity
     let entity = self.service.create_operator_entity(&session, name, OperatorNameType::LoginName)?;
     debug!("created new operator: {:?}", entity);

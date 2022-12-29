@@ -15,16 +15,18 @@ use {crate::operator::OperatorId,
 #[domain_commands(entity, store)]
 #[domain_store(table_name = "t_rbac_session", params_extractor = "crate::params_extractor")]
 struct __Session__ {
-  id:          EntityId,
+  id:           EntityId,
   #[domain_value(skip_new_type = true)]
-  operator_id: OperatorId,
+  operator_id:  OperatorId,
   #[domain_value(optional = true)]
-  data:        String,
-  login_at:    UtcDateTime,
-  last_hit_at: UtcDateTime,
-  expire_at:   UtcDateTime,
+  data:         String,
+  #[domain_value(enums = "ChangePassword|Normal")]
+  session_type: String,
+  login_at:     UtcDateTime,
+  last_hit_at:  UtcDateTime,
+  expire_at:    UtcDateTime,
   #[domain_value(skip_new_type = true)]
-  owner:       Owner,
+  owner:        Owner,
 }
 
 impl FromValue for SessionId {

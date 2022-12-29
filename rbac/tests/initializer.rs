@@ -32,6 +32,11 @@ pub async fn login(app: &RBACApplication) -> Result<SessionEntity> {
   let name = OperatorName::new("ROOT");
   let password = OperatorPassword::new("passw0rd!");
 
-  let session = app.login_with_name_password(owner, name.clone(), password.clone()).await?;
+  let session = app.login_with_name_password(owner, name, password).await?;
+  Ok(session)
+}
+
+pub async fn login_with(app: &RBACApplication, owner: Owner, name: OperatorName, password: OperatorPassword) -> Result<SessionEntity> {
+  let session = app.login_with_name_password(owner, name, password).await?;
   Ok(session)
 }

@@ -1,4 +1,5 @@
-use {crate::initializer::login,
+use {crate::initializer::{login,
+                          login_with},
      anyhow::Result,
      crcnt_rbac::includes::{FeatureCode,
                             FeatureDescription,
@@ -95,4 +96,17 @@ async fn test_set_role_operators() -> Result<()> {
 }
 
 #[tokio::test]
-async fn test_get_operator_features() -> Result<()> { todo!() }
+async fn test_get_operator_features() -> Result<()> {
+  let app = initializer::init();
+  let session = login_with(&app, "SYS".into(), "admin".into(), "ChangeMe!".into()).await?;
+
+  let features = app.fetch_session_features(session.ref_id()).await?;
+
+  info!("{:?}", features);
+  Ok(())
+}
+
+async fn test_change_password() -> Result<()> {
+  // todo
+  todo!()
+}

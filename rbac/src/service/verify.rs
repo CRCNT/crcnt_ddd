@@ -1,6 +1,5 @@
 use {crate::{error::{Error::{OperatorDeleted,
                              OperatorInactive,
-                             OperatorNeedChangePassword,
                              OperatorTooManyFailedLogin,
                              SessionExpired},
                      Result},
@@ -13,18 +12,15 @@ use {crate::{error::{Error::{OperatorDeleted,
      crcnt_ddd::value::UtcDateTime};
 
 pub trait ServiceVerify {
-  fn verify_operator_availabity(&self, operator: &OperatorEntity) -> Result<()>;
+  fn verify_operator_availability(&self, operator: &OperatorEntity) -> Result<()>;
   fn verify_operator_password(&self, operator: &OperatorEntity, password: &OperatorPassword) -> Result<()>;
   fn verify_session_availability(&self, session: &SessionEntity) -> Result<()>;
 }
 
 impl ServiceVerify for Service {
-  fn verify_operator_availabity(&self, operator: &OperatorEntity) -> Result<()> {
+  fn verify_operator_availability(&self, operator: &OperatorEntity) -> Result<()> {
     if *(operator.ref_deleted().inner()) {
       return Err(OperatorDeleted);
-    }
-    if &OperatorStatus::NeedChangePwd == operator.ref_status() {
-      return Err(OperatorNeedChangePassword);
     }
     if &OperatorStatus::Inactive == operator.ref_status() {
       return Err(OperatorInactive);

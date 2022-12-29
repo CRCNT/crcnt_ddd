@@ -8,7 +8,6 @@ use {crate::{error::Result,
                        FeatureStatus},
              operator::{OperatorEntity,
                         OperatorFailedTimes,
-                        OperatorId,
                         OperatorName,
                         OperatorNameType,
                         OperatorPassword,
@@ -26,7 +25,8 @@ use {crate::{error::Result,
              session::{SessionEntity,
                        SessionExpireAt,
                        SessionLastHitAt,
-                       SessionLoginAt}},
+                       SessionLoginAt,
+                       SessionSessionType}},
      crcnt_ddd::value::{CreateAt,
                         Creator,
                         EntityId,
@@ -36,7 +36,7 @@ use {crate::{error::Result,
 
 pub trait ServiceFactory {
   fn create_operator_entity(&self, session: &SessionEntity, name: OperatorName, name_type: OperatorNameType) -> Result<OperatorEntity>;
-  fn create_session_entity(&self, owner: Owner, operator_id: OperatorId) -> Result<SessionEntity>;
+  fn create_session_entity(&self, operator: &OperatorEntity) -> Result<SessionEntity>;
   fn create_feature_entity(&self,
                            creator: Creator,
                            parent_id: Option<FeatureParentId>,
@@ -84,12 +84,19 @@ impl ServiceFactory for Service {
                                 .build())
   }
 
-  fn create_session_entity(&self, owner: Owner, operator_id: OperatorId) -> Result<SessionEntity> {
+  fn create_session_entity(&self, operator: &OperatorEntity) -> Result<SessionEntity> {
     let login_at = SessionLoginAt::new(UtcDateTime::now());
+    let owner = operator.ref_owner().clone();
     let expire_at: SessionExpireAt = (login_at.inner().clone() + self.session_expiration.clone()).into();
+    let session_type = if operator.ref_status() == &OperatorStatus::NeedChangePwd {
+      SessionSessionType::ChangePassword
+    } else {
+      SessionSessionType::Normal
+    };
     Ok(SessionEntity::builder().id(EntityId::new_with_prefix("SS").into())
-                               .operator_id(operator_id)
+                               .operator_id(operator.ref_id().clone())
                                .data(None)
+                               .session_type(session_type)
                                .login_at(login_at)
                                .last_hit_at(UtcDateTime::now().into())
                                .expire_at(expire_at)

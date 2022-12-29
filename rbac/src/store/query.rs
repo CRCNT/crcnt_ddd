@@ -8,28 +8,34 @@ use {crate::{error::{Error::*,
                         RoleEntity},
              operator::{OperatorEntity,
                         OperatorEntityCRUDExec,
-                        OperatorName},
+                        OperatorName,
+                        RoleOperatorEntity,
+                        RoleOperatorEntityCRUDExec},
              role::{RoleEntityCRUDExec,
+                    RoleFeatureEntity,
+                    RoleFeatureEntityCRUDExec,
                     RoleId},
              session::{SessionEntity,
                        SessionEntityCRUDExec,
                        SessionId},
              store::Store},
      async_trait::async_trait,
-     crcnt_ddd::{collections::merge_results,
-                 value::Owner},
-     mysql_common::params};
+     crcnt_ddd::collections::merge_results,
+     mysql_common::{params,
+                    params::Params}};
 
 #[async_trait]
 pub trait StoreQuery {
   async fn get_session(&self, session_id: &SessionId) -> Result<SessionEntity>;
-  async fn find_operator(&self, owner: &Owner, name: &OperatorName) -> Result<Option<OperatorEntity>>;
+  async fn find_operator_by_name(&self, name: &OperatorName) -> Result<Option<OperatorEntity>>;
   async fn get_operator(&self, operator_id: &OperatorId) -> Result<OperatorEntity>;
   async fn get_feature(&self, feature_id: &FeatureId) -> Result<FeatureEntity>;
   async fn get_feature_by_code(&self, feature_code: &FeatureCode) -> Result<Option<FeatureEntity>>;
   async fn get_role(&self, role_id: &RoleId) -> Result<RoleEntity>;
-  async fn check_operator_duplicated(&self, owner: &Owner, name: &OperatorName) -> Result<()> {
-    let operator = self.find_operator(owner, name).await?;
+  async fn get_feature_ids(&self, role_ids: Vec<RoleId>) -> Result<Vec<FeatureId>>;
+  async fn get_operator_role_ids(&self, operator_id: &OperatorId) -> Result<Vec<RoleId>>;
+  async fn check_operator_duplicated(&self, name: &OperatorName) -> Result<()> {
+    let operator = self.find_operator_by_name(name).await?;
     if operator.is_some() { Err(OperatorNameDuplicated) } else { Ok(()) }
   }
   async fn check_feature_code_duplicated(&self, feature_code: &FeatureCode) -> Result<()> {
@@ -40,8 +46,8 @@ pub trait StoreQuery {
       Ok(())
     }
   }
-  async fn get_operator_by_name(&self, owner: &Owner, name: &OperatorName) -> Result<OperatorEntity> {
-    let xs = self.find_operator(owner, name).await?;
+  async fn get_operator_by_name(&self, name: &OperatorName) -> Result<OperatorEntity> {
+    let xs = self.find_operator_by_name(name).await?;
     if let Some(x) = xs { Ok(x) } else { Err(OperatorNotFound) }
   }
   async fn get_features(&self, feature_ids: Vec<FeatureId>) -> Result<Vec<FeatureEntity>> {
@@ -71,11 +77,10 @@ impl StoreQuery for Store {
     }
   }
 
-  async fn find_operator(&self, owner: &Owner, name: &OperatorName) -> Result<Option<OperatorEntity>> {
+  async fn find_operator_by_name(&self, name: &OperatorName) -> Result<Option<OperatorEntity>> {
     let mut conn = self.get_conn().await?;
-    let xs: Vec<OperatorEntity> = self.exec_select_where_operator_entity("WHERE owner = :owner AND name = :name",
+    let xs: Vec<OperatorEntity> = self.exec_select_where_operator_entity("WHERE  name = :name",
                                                                          params! {
-                                                                           "owner" => owner.inner(),
                                                                            "name" => name.inner()
                                                                          },
                                                                          &mut conn)
@@ -126,5 +131,30 @@ impl StoreQuery for Store {
                                        .await
                                        .map_err(|e| DatabaseError(e.to_string()))?;
     if let Some(role) = role { Ok(role) } else { Err(RoleNotFound) }
+  }
+
+  async fn get_feature_ids(&self, role_ids: Vec<RoleId>) -> Result<Vec<FeatureId>> {
+    let mut conn = self.get_conn().await?;
+    let in_cond = role_ids.iter().map(|x| format!("'{}'", x.inner().inner())).collect::<Vec<_>>().join(",");
+    let condition = if in_cond.is_empty() {
+      "".to_string()
+    } else {
+      format!("WHERE role_id in ({})", in_cond)
+    };
+    let role_features: Vec<RoleFeatureEntity> = self.exec_select_where_role_feature_entity(condition, Params::Empty, &mut conn)
+                                                    .await
+                                                    .map_err(|e| DatabaseError(e.to_string()))?;
+
+    Ok(role_features.iter().map(|x| x.ref_feature_id().clone()).collect())
+  }
+
+  async fn get_operator_role_ids(&self, operator_id: &OperatorId) -> Result<Vec<RoleId>> {
+    let mut conn = self.get_conn().await?;
+    let role_operators: Vec<RoleOperatorEntity> = self.exec_select_where_role_operator_entity("WHERE operator_id = :operator_id",
+                                                                                              params! {"operator_id" => operator_id.inner().inner()},
+                                                                                              &mut conn)
+                                                      .await
+                                                      .map_err(|e| DatabaseError(e.to_string()))?;
+    Ok(role_operators.iter().map(|x| x.ref_role_id().clone()).collect())
   }
 }
