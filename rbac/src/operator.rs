@@ -48,8 +48,8 @@ struct __Operator__ {
 #[doc(hidden)]
 #[derive(Domain)]
 #[domain_commands(entity, store)]
-#[domain_store(params_extractor = "crate::params_extractor", table_name = "t_rbac_operator_role")]
-struct __OperatorRole__ {
+#[domain_store(params_extractor = "crate::params_extractor", table_name = "t_rbac_role_operator")]
+struct __RoleOperator__ {
   id:          EntityId,
   #[domain_value(skip_new_type = true)]
   operator_id: OperatorId,

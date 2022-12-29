@@ -4,8 +4,8 @@ use {crate::{error::{Error,
                        FeatureEntityCRUDStmt},
              operator::{OperatorEntityCRUDExec,
                         OperatorEntityCRUDStmt,
-                        OperatorRoleEntityCRUDExec,
-                        OperatorRoleEntityCRUDStmt},
+                        RoleOperatorEntityCRUDExec,
+                        RoleOperatorEntityCRUDStmt},
              role::{RoleEntityCRUDExec,
                     RoleEntityCRUDStmt,
                     RoleFeatureEntityCRUDExec,
@@ -30,8 +30,8 @@ impl FeatureEntityCRUDExec for Store {}
 impl OperatorEntityCRUDStmt for Store {}
 impl OperatorEntityCRUDExec for Store {}
 
-impl OperatorRoleEntityCRUDStmt for Store {}
-impl OperatorRoleEntityCRUDExec for Store {}
+impl RoleOperatorEntityCRUDStmt for Store {}
+impl RoleOperatorEntityCRUDExec for Store {}
 
 impl RoleEntityCRUDStmt for Store {}
 impl RoleEntityCRUDExec for Store {}

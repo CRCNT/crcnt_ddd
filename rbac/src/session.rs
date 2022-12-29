@@ -46,4 +46,6 @@ impl ConvIr<SessionId> for StrIr {
 
 impl SessionEntity {
   pub fn as_creator(&self) -> Creator { self.ref_operator_id().inner().inner().into() }
+
+  pub fn as_owner(&self) -> Owner { self.ref_owner().clone() }
 }

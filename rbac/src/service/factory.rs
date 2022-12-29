@@ -45,8 +45,7 @@ pub trait ServiceFactory {
                            description: Option<FeatureDescription>)
                            -> Result<FeatureEntity>;
   fn create_role_entity(&self,
-                        owner: Owner,
-                        creator: Creator,
+                        session: &SessionEntity,
                         code: RoleCode,
                         name: RoleName,
                         level: RoleLevel,
@@ -118,13 +117,14 @@ impl ServiceFactory for Service {
   }
 
   fn create_role_entity(&self,
-                        owner: Owner,
-                        creator: Creator,
+                        session: &SessionEntity,
                         code: RoleCode,
                         name: RoleName,
                         level: RoleLevel,
                         description: Option<RoleDescription>)
                         -> Result<RoleEntity> {
+    let owner: Owner = session.as_owner();
+    let creator: Creator = session.as_creator();
     Ok(RoleEntity::builder().id(EntityId::new_with_prefix("RL").into())
                             .code(code)
                             .name(name)

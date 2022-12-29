@@ -12,14 +12,12 @@ use {crate::{application::Application,
              session::SessionId,
              store::{StoreCreate,
                      StoreQuery}},
-     async_trait::async_trait,
-     crcnt_ddd::value::Owner};
+     async_trait::async_trait};
 
 #[async_trait]
 pub trait ApplicationRoleAdmin {
   async fn create_role(&self,
                        session_id: SessionId,
-                       owner: Owner,
                        code: RoleCode,
                        name: RoleName,
                        level: RoleLevel,
@@ -33,7 +31,6 @@ pub trait ApplicationRoleAdmin {
 impl ApplicationRoleAdmin for Application {
   async fn create_role(&self,
                        session_id: SessionId,
-                       owner: Owner,
                        code: RoleCode,
                        name: RoleName,
                        level: RoleLevel,
@@ -43,8 +40,7 @@ impl ApplicationRoleAdmin for Application {
     let session = self.store.get_session(&session_id).await?;
     let _ = self.service.verify_session_availability(&session)?;
     // create the entity
-    let creator = session.as_creator();
-    let entity = self.service.create_role_entity(owner, creator, code, name, level, description)?;
+    let entity = self.service.create_role_entity(&session, code, name, level, description)?;
     // insert the entity
     let _ = self.store.insert_role_entity(&entity).await?;
     Ok(entity)

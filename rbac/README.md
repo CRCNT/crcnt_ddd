@@ -61,12 +61,12 @@ CREATE TABLE t_rbac_feature (
 
 ### Operator's Roles
 ```mysql
-CREATE TABLE t_rbac_operator_role (
+CREATE TABLE t_rbac_role_operator (
     id VARCHAR(32) PRIMARY KEY,
-    operator_id VARCHAR(32) NOT NULL,
     role_id VARCHAR(32) NOT NULL,
+    operator_id VARCHAR(32) NOT NULL,
     owner VARCHAR(50) NOT NULL,
-    create_at TIMESTAMP NOT NULL,
+    create_at TIMESTAMP NOT NULL
 ) COMMENT 'the relation of operator and role for rbac module';
 ```
 
