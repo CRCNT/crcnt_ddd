@@ -12,7 +12,8 @@ use {crate::{error::Result,
                         OperatorName,
                         OperatorNameType,
                         OperatorPassword,
-                        OperatorStatus},
+                        OperatorStatus,
+                        RoleOperatorEntity},
              role::{RoleCode,
                     RoleDescription,
                     RoleEntity,
@@ -34,7 +35,7 @@ use {crate::{error::Result,
                         UtcDateTime}};
 
 pub trait ServiceFactory {
-  fn create_operator_entity(&self, owner: Owner, creator: Creator, name: OperatorName, name_type: OperatorNameType) -> Result<OperatorEntity>;
+  fn create_operator_entity(&self, session: &SessionEntity, name: OperatorName, name_type: OperatorNameType) -> Result<OperatorEntity>;
   fn create_session_entity(&self, owner: Owner, operator_id: OperatorId) -> Result<SessionEntity>;
   fn create_feature_entity(&self,
                            creator: Creator,
@@ -52,6 +53,7 @@ pub trait ServiceFactory {
                         description: Option<RoleDescription>)
                         -> Result<RoleEntity>;
   fn create_role_features(&self, session: &SessionEntity, role: RoleEntity, features: Vec<FeatureEntity>) -> Result<Vec<RoleFeatureEntity>>;
+  fn create_role_operators(&self, session: &SessionEntity, role: RoleEntity, operators: Vec<OperatorEntity>) -> Result<Vec<RoleOperatorEntity>>;
   fn hit_session_entity(&self, session: SessionEntity) -> Result<SessionEntity>;
   fn increase_operator_failed_times(&self, operator: OperatorEntity) -> OperatorEntity {
     let failed_times: OperatorFailedTimes = OperatorFailedTimes::new(*(operator.ref_failed_times().inner()) + 1);
@@ -60,7 +62,9 @@ pub trait ServiceFactory {
 }
 
 impl ServiceFactory for Service {
-  fn create_operator_entity(&self, owner: Owner, creator: Creator, name: OperatorName, name_type: OperatorNameType) -> Result<OperatorEntity> {
+  fn create_operator_entity(&self, session: &SessionEntity, name: OperatorName, name_type: OperatorNameType) -> Result<OperatorEntity> {
+    let owner: Owner = session.as_owner();
+    let creator: Creator = session.as_creator();
     let password = OperatorPassword::change_me();
     let password = self.sha256_hash_password(&self.password_salt, password)?;
     Ok(OperatorEntity::builder().owner(owner)
@@ -152,6 +156,20 @@ impl ServiceFactory for Service {
                                              .build()
                })
                .collect::<Vec<_>>())
+  }
+
+  fn create_role_operators(&self, session: &SessionEntity, role: RoleEntity, operators: Vec<OperatorEntity>) -> Result<Vec<RoleOperatorEntity>> {
+    let owner = session.ref_owner();
+    Ok(operators.iter()
+                .map(|operator| {
+                  RoleOperatorEntity::builder().id(EntityId::new_with_prefix("RO").into())
+                                               .role_id(role.ref_id().clone())
+                                               .operator_id(operator.ref_id().clone())
+                                               .owner(owner.clone())
+                                               .create_at(CreateAt::now())
+                                               .build()
+                })
+                .collect::<Vec<_>>())
   }
 
   fn hit_session_entity(&self, session: SessionEntity) -> Result<SessionEntity> {

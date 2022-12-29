@@ -13,13 +13,13 @@ use {crate::{error::{Error::{OperatorDeleted,
      crcnt_ddd::value::UtcDateTime};
 
 pub trait ServiceVerify {
-  fn verify_operator_entity(&self, operator: &OperatorEntity) -> Result<()>;
+  fn verify_operator_availabity(&self, operator: &OperatorEntity) -> Result<()>;
   fn verify_operator_password(&self, operator: &OperatorEntity, password: &OperatorPassword) -> Result<()>;
   fn verify_session_availability(&self, session: &SessionEntity) -> Result<()>;
 }
 
 impl ServiceVerify for Service {
-  fn verify_operator_entity(&self, operator: &OperatorEntity) -> Result<()> {
+  fn verify_operator_availabity(&self, operator: &OperatorEntity) -> Result<()> {
     if *(operator.ref_deleted().inner()) {
       return Err(OperatorDeleted);
     }

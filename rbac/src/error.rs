@@ -28,6 +28,9 @@ pub enum Error {
   #[error("Operator Login Failed Too Many Times")]
   OperatorTooManyFailedLogin,
 
+  #[error("Operator Name Duplicated")]
+  OperatorNameDuplicated,
+
   #[error("Password Mismatched")]
   PasswordMismatch,
 

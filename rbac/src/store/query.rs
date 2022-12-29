@@ -4,7 +4,8 @@ use {crate::{error::{Error::*,
                        FeatureEntity,
                        FeatureEntityCRUDExec,
                        FeatureId},
-             includes::RoleEntity,
+             includes::{OperatorId,
+                        RoleEntity},
              operator::{OperatorEntity,
                         OperatorEntityCRUDExec,
                         OperatorName},
@@ -15,16 +16,22 @@ use {crate::{error::{Error::*,
                        SessionId},
              store::Store},
      async_trait::async_trait,
-     crcnt_ddd::value::Owner,
+     crcnt_ddd::{collections::merge_results,
+                 value::Owner},
      mysql_common::params};
 
 #[async_trait]
 pub trait StoreQuery {
   async fn get_session(&self, session_id: &SessionId) -> Result<SessionEntity>;
   async fn find_operator(&self, owner: &Owner, name: &OperatorName) -> Result<Option<OperatorEntity>>;
+  async fn get_operator(&self, operator_id: &OperatorId) -> Result<OperatorEntity>;
   async fn get_feature(&self, feature_id: &FeatureId) -> Result<FeatureEntity>;
   async fn get_feature_by_code(&self, feature_code: &FeatureCode) -> Result<Option<FeatureEntity>>;
   async fn get_role(&self, role_id: &RoleId) -> Result<RoleEntity>;
+  async fn check_operator_duplicated(&self, owner: &Owner, name: &OperatorName) -> Result<()> {
+    let operator = self.find_operator(owner, name).await?;
+    if operator.is_some() { Err(OperatorNameDuplicated) } else { Ok(()) }
+  }
   async fn check_feature_code_duplicated(&self, feature_code: &FeatureCode) -> Result<()> {
     let feature = self.get_feature_by_code(feature_code).await?;
     if let Some(_feature) = feature {
@@ -40,17 +47,12 @@ pub trait StoreQuery {
   async fn get_features(&self, feature_ids: Vec<FeatureId>) -> Result<Vec<FeatureEntity>> {
     let features = feature_ids.iter().map(|x| async { self.get_feature(x).await }).collect::<Vec<_>>();
     let features: Vec<Result<FeatureEntity>> = futures::future::join_all(features).await;
-    let init: Vec<FeatureEntity> = vec![];
-    let features = features.iter().fold(Ok(init), |acc, next| {
-                                    let acc = acc.and_then(|mut xs| {
-                                                   next.clone().map(|x| {
-                                                                 xs.push(x.clone());
-                                                                 xs
-                                                               })
-                                                 });
-                                    acc
-                                  });
-    features
+    merge_results(features)
+  }
+  async fn get_operators(&self, operator_ids: Vec<OperatorId>) -> Result<Vec<OperatorEntity>> {
+    let operators = operator_ids.iter().map(|x| async { self.get_operator(x).await }).collect::<Vec<_>>();
+    let operators: Vec<Result<OperatorEntity>> = futures::future::join_all(operators).await;
+    merge_results(operators)
   }
 }
 
@@ -80,6 +82,18 @@ impl StoreQuery for Store {
                                       .await
                                       .map_err(|e| DatabaseError(e.to_string()))?;
     Ok(xs.first().map(|x| x.clone()))
+  }
+
+  async fn get_operator(&self, operator_id: &OperatorId) -> Result<OperatorEntity> {
+    let mut conn = self.get_conn().await?;
+    let operator = self.exec_get_operator_entity(operator_id, &mut conn)
+                       .await
+                       .map_err(|e| DatabaseError(e.to_string()))?;
+    if let Some(operator) = operator {
+      Ok(operator)
+    } else {
+      Err(OperatorNotFound)
+    }
   }
 
   async fn get_feature(&self, feature_id: &FeatureId) -> Result<FeatureEntity> {

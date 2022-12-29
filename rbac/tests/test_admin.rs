@@ -1,10 +1,10 @@
 use {crate::initializer::login,
      anyhow::Result,
-     crcnt_ddd::value::Owner,
      crcnt_rbac::includes::{FeatureCode,
                             FeatureDescription,
                             FeatureId,
                             FeatureName,
+                            OperatorId,
                             OperatorName,
                             RBACApplicationFeatureAdmin,
                             RBACApplicationOperatorAdmin,
@@ -25,8 +25,7 @@ async fn test_add_operator() -> Result<()> {
   let session = login(&app).await?;
   let session_id: SessionId = session.ref_id().clone();
   let name = OperatorName::new("admin");
-  let owner = Owner::new("PROMO");
-  let operator = app.create_operator_with_login_name(session_id, owner, name).await?;
+  let operator = app.create_operator_with_login_name(session_id, name).await?;
   info!("{:?}", operator);
 
   Ok(())
@@ -60,12 +59,11 @@ async fn test_add_feature() -> Result<()> {
 async fn test_add_role() -> Result<()> {
   let app = initializer::init();
   let session = login(&app).await?;
-  let owner = Owner::new("PROMO");
   let code: RoleCode = "SYS_ADMIN".into();
   let name: RoleName = "system administrator".into();
   let description = None;
   let level = RoleLevel::new(0);
-  let role = app.create_role(session.mv_id(), owner, code, name, level, description).await?;
+  let role = app.create_role(session.mv_id(), code, name, level, description).await?;
   info!("created role: {:?}", role);
   Ok(())
 }
@@ -84,7 +82,17 @@ async fn test_set_role_features() -> Result<()> {
 }
 
 #[tokio::test]
-async fn test_set_role_operators() -> Result<()> { todo!() }
+async fn test_set_role_operators() -> Result<()> {
+  let app = initializer::init();
+  let session = login(&app).await?;
+
+  let role_id = RoleId::new("RL01GNA0AQ40BWT8A01B0BPAR80B");
+  let operator_id = OperatorId::new("OP01GNEVTRKGZC6RRJ76CQQ3782Y");
+
+  let _ = app.set_role_operators(session.mv_id(), role_id, vec![operator_id]).await?;
+
+  Ok(())
+}
 
 #[tokio::test]
 async fn test_get_operator_features() -> Result<()> { todo!() }
