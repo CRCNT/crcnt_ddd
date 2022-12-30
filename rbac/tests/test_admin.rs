@@ -108,7 +108,6 @@ async fn test_get_operator_features() -> Result<()> {
 
 #[tokio::test]
 async fn test_change_password() -> Result<()> {
-  // todo
   let app = initializer::init();
   let session = login_with(&app, "SYS".into(), "admin".into(), "ChangeMe!".into()).await?;
 
