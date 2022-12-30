@@ -29,6 +29,7 @@ ulid = "1.0"
 sha2 = "0.10"
 hex = "0.4"
 futures = "0.3"
+zxcvbn = "2"
 
 [dev-dependencies]
 tracing-subscriber = {version = "0.3", features = ["env-filter", "time", "local-time"]}

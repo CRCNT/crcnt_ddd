@@ -55,6 +55,7 @@ pub trait ServiceFactory {
   fn create_role_features(&self, session: &SessionEntity, role: RoleEntity, features: Vec<FeatureEntity>) -> Result<Vec<RoleFeatureEntity>>;
   fn create_role_operators(&self, session: &SessionEntity, role: RoleEntity, operators: Vec<OperatorEntity>) -> Result<Vec<RoleOperatorEntity>>;
   fn hit_session_entity(&self, session: SessionEntity) -> Result<SessionEntity>;
+  fn update_operator_password(&self, operator: OperatorEntity, new_password: OperatorPassword) -> Result<OperatorEntity>;
   fn increase_operator_failed_times(&self, operator: OperatorEntity) -> OperatorEntity {
     let failed_times: OperatorFailedTimes = OperatorFailedTimes::new(*(operator.ref_failed_times().inner()) + 1);
     operator.set_failed_times(failed_times).set_update_at(UpdateAt::now())
@@ -184,5 +185,12 @@ impl ServiceFactory for Service {
     let expire = now.clone() + self.session_expiration.clone();
     let session = session.set_last_hit_at(SessionLastHitAt::new(now.clone())).set_expire_at(expire.into());
     Ok(session)
+  }
+
+  fn update_operator_password(&self, operator: OperatorEntity, new_password: OperatorPassword) -> Result<OperatorEntity> {
+    let new_password = self.sha256_hash_password(&self.password_salt, new_password)?;
+    Ok(operator.set_password(new_password)
+               .set_status(OperatorStatus::Active)
+               .set_update_at(UpdateAt::now()))
   }
 }

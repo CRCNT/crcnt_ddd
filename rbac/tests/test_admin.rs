@@ -7,6 +7,7 @@ use {crate::initializer::{login,
                             FeatureName,
                             OperatorId,
                             OperatorName,
+                            OperatorPassword,
                             RBACApplicationFeatureAdmin,
                             RBACApplicationOperatorAdmin,
                             RBACApplicationRoleAdmin,
@@ -24,9 +25,8 @@ mod initializer;
 async fn test_add_operator() -> Result<()> {
   let app = initializer::init();
   let session = login(&app).await?;
-  let session_id: SessionId = session.ref_id().clone();
   let name = OperatorName::new("admin");
-  let operator = app.create_operator_with_login_name(session_id, name).await?;
+  let operator = app.create_operator_with_login_name(session.ref_id(), name).await?;
   info!("{:?}", operator);
 
   Ok(())
@@ -106,7 +106,18 @@ async fn test_get_operator_features() -> Result<()> {
   Ok(())
 }
 
+#[tokio::test]
 async fn test_change_password() -> Result<()> {
   // todo
-  todo!()
+  let app = initializer::init();
+  let session = login_with(&app, "SYS".into(), "admin".into(), "ChangeMe!".into()).await?;
+
+  let old_password = OperatorPassword::change_me();
+  let new_password = OperatorPassword::new("A_newPassword!");
+  let _ = app.change_password(session.ref_id(), old_password, new_password).await?;
+
+  let session = login_with(&app, "SYS".into(), "admin".into(), "A_newPassword!".into()).await?;
+  info!("new session: {:?}", session);
+
+  Ok(())
 }

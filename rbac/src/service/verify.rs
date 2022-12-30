@@ -1,7 +1,10 @@
-use {crate::{error::{Error::{OperatorDeleted,
+use {crate::{error::{Error::{NewPasswordSameWithOldPassword,
+                             OperatorDeleted,
                              OperatorInactive,
                              OperatorNeedChangePassword,
                              OperatorTooManyFailedLogin,
+                             PasswordIllegal,
+                             PasswordTooWeak,
                              SessionExpired},
                      Result},
              includes::{OperatorPassword,
@@ -11,12 +14,15 @@ use {crate::{error::{Error::{OperatorDeleted,
                        ServiceHasher},
              session::{SessionEntity,
                        SessionSessionType}},
-     crcnt_ddd::value::UtcDateTime};
+     crcnt_ddd::value::UtcDateTime,
+     tracing::error};
 
 pub trait ServiceVerify {
   fn verify_operator_availability(&self, operator: &OperatorEntity) -> Result<()>;
   fn verify_operator_password(&self, operator: &OperatorEntity, password: &OperatorPassword) -> Result<()>;
   fn verify_normal_session_availability(&self, session: &SessionEntity) -> Result<()>;
+  fn verify_session_availability_ignore_type(&self, session: &SessionEntity) -> Result<()>;
+  fn verify_updating_password(&self, old_password: &OperatorPassword, new_password: &OperatorPassword) -> Result<()>;
 }
 
 impl ServiceVerify for Service {
@@ -49,6 +55,33 @@ impl ServiceVerify for Service {
       // expired
       return Err(SessionExpired);
     }
+    Ok(())
+  }
+
+  fn verify_session_availability_ignore_type(&self, session: &SessionEntity) -> Result<()> {
+    let expire = session.ref_expire_at().inner();
+    let now = UtcDateTime::now();
+
+    if expire < &now {
+      // expired
+      return Err(SessionExpired);
+    }
+    Ok(())
+  }
+
+  fn verify_updating_password(&self, old_password: &OperatorPassword, new_password: &OperatorPassword) -> Result<()> {
+    if new_password.inner().eq(old_password.inner()) {
+      return Err(NewPasswordSameWithOldPassword);
+    }
+    // check the new password strength
+    let entropy = zxcvbn::zxcvbn(new_password.inner(), &[]).map_err(|e| {
+                                                             error!("password strength checking error: {}", e.to_string());
+                                                             PasswordIllegal
+                                                           })?;
+    if entropy.score() < 3 {
+      return Err(PasswordTooWeak);
+    }
+
     Ok(())
   }
 }

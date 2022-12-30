@@ -34,6 +34,15 @@ pub enum Error {
   #[error("Password Mismatched")]
   PasswordMismatch,
 
+  #[error("Password Too Weak")]
+  PasswordTooWeak,
+
+  #[error("Illegal Password")]
+  PasswordIllegal,
+
+  #[error("The new password is same with the old one")]
+  NewPasswordSameWithOldPassword,
+
   #[error("Feature Not Found")]
   FeatureNotFound,
 

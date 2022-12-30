@@ -1,5 +1,7 @@
-use {crate::{error::{Error,
+use {crate::{error::{Error::{self,
+                             DatabaseError},
                      Result},
+             includes::SessionId,
              operator::OperatorId,
              session::SessionEntityCRUDExec,
              store::Store},
@@ -10,6 +12,7 @@ use {crate::{error::{Error,
 #[async_trait]
 pub trait StoreDelete {
   async fn delete_session(&self, owner: &Owner, operator_id: &OperatorId) -> Result<()>;
+  async fn delete_session_by_id(&self, session_id: &SessionId) -> Result<()>;
 }
 
 #[async_trait]
@@ -24,5 +27,12 @@ impl StoreDelete for Store {
                                           &mut conn)
         .await
         .map_err(|e| Error::DatabaseError(e.to_string()))
+  }
+
+  async fn delete_session_by_id(&self, session_id: &SessionId) -> Result<()> {
+    let mut conn = self.get_conn().await?;
+    self.exec_delete_by_id_session_entity(session_id, &mut conn)
+        .await
+        .map_err(|e| DatabaseError(e.to_string()))
   }
 }
