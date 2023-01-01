@@ -83,7 +83,14 @@ pub fn generate_store(derive_input: &DeriveInput) -> TokenStream {
   let update_fn_name = format_ident!("exec_update_{}", meta.entity_ident.to_string().to_case(Case::Snake));
   let delete_where_fn_name = format_ident!("exec_delete_where_{}", meta.entity_ident.to_string().to_case(Case::Snake));
   let delete_by_id_fn_name = format_ident!("exec_delete_by_id_{}", meta.entity_ident.to_string().to_case(Case::Snake));
-  let entity_id_ident = format_ident!("{}Id", meta.value_type_prefix);
+
+  let field_id = meta.entity_meta
+                     .fields
+                     .all_fields()
+                     .iter()
+                     .find(|&x| "id".eq(&x.name))
+                     .expect("no `id` field");
+  let entity_id_ident = field_id.field_type(&meta.entity_meta); //format_ident!("{}Id", meta.value_type_prefix);
 
   let get_row_items =
     meta.fields

@@ -4,6 +4,7 @@ mod rice {
   use {crcnt_ddd::value::{CreateAt,
                           Creator,
                           Deleted,
+                          EntityId,
                           UpdateAt,
                           Updater},
        crcnt_ddd_macros::Domain};
@@ -12,7 +13,8 @@ mod rice {
   #[domain_commands(entity, store)]
   #[domain_store(table_name = "t_rice", params_extractor = "super::mysql_tools::params_inspect")]
   struct __Rice__ {
-    id:          String,
+    #[domain_value(skip_new_type = true)]
+    id:          EntityId,
     name:        String,
     #[domain_value(skip_new_type = true)]
     create_time: CreateAt,
@@ -31,6 +33,7 @@ mod test {
        crcnt_ddd::value::{CreateAt,
                           Creator,
                           Deleted,
+                          EntityId,
                           UpdateAt,
                           Updater},
        mysql_async::Pool,
@@ -70,7 +73,7 @@ mod test {
       }
     }
 
-    let rice_id = RiceId::new("01");
+    let rice_id = EntityId::new_with_prefix("RC");
     let rice: Option<RiceEntity> = Store.exec_get_rice_entity(&rice_id, &mut conn).await?;
     println!("{:?}", rice);
     let rice = rice.unwrap();

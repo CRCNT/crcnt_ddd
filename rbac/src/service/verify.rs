@@ -90,7 +90,7 @@ impl ServiceVerify for Service {
   }
 
   fn can_access_feature(&self, features: &Vec<FeatureEntity>, feature_code: &FeatureCode) -> Result<()> {
-    if let Some(_) = features.iter().find(|x| x.mv_code().inner().eq(feature_code.inner())) {
+    if let Some(_) = features.iter().find(|&x| x.ref_code().inner().eq(feature_code.inner())) {
       Ok(())
     } else {
       Err(FeatureAccessNotAuthorized)
