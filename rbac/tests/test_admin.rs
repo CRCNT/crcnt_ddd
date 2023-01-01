@@ -98,7 +98,7 @@ async fn test_set_role_operators() -> Result<()> {
 #[tokio::test]
 async fn test_get_operator_features() -> Result<()> {
   let app = initializer::init();
-  let session = login_with(&app, "SYS".into(), "admin".into(), "ChangeMe!".into()).await?;
+  let session = login_with(&app, "admin".into(), "ChangeMe!".into()).await?;
 
   let features = app.fetch_session_features(session.ref_id()).await?;
 
@@ -109,13 +109,13 @@ async fn test_get_operator_features() -> Result<()> {
 #[tokio::test]
 async fn test_change_password() -> Result<()> {
   let app = initializer::init();
-  let session = login_with(&app, "SYS".into(), "admin".into(), "ChangeMe!".into()).await?;
+  let session = login_with(&app, "admin".into(), "ChangeMe!".into()).await?;
 
   let old_password = OperatorPassword::change_me();
   let new_password = OperatorPassword::new("A_newPassword!");
   let _ = app.change_password(session.ref_id(), old_password, new_password).await?;
 
-  let session = login_with(&app, "SYS".into(), "admin".into(), "A_newPassword!".into()).await?;
+  let session = login_with(&app, "admin".into(), "A_newPassword!".into()).await?;
   info!("new session: {:?}", session);
 
   Ok(())

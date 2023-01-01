@@ -11,19 +11,18 @@ use {crate::{application::Application,
                      StoreDelete,
                      StoreQuery,
                      StoreUpdate}},
-     async_trait::async_trait,
-     crcnt_ddd::value::Owner};
+     async_trait::async_trait};
 
 #[async_trait]
 pub trait ApplicationSessionAdmin {
-  async fn login_with_name_password(&self, owner: Owner, name: OperatorName, password: OperatorPassword) -> Result<SessionEntity>;
+  async fn login_with_name_password(&self, name: OperatorName, password: OperatorPassword) -> Result<SessionEntity>;
   async fn hit_session(&self, session_id: &SessionId) -> Result<SessionEntity>;
   async fn fetch_session_features(&self, session_id: &SessionId) -> Result<Vec<FeatureEntity>>;
 }
 
 #[async_trait]
 impl ApplicationSessionAdmin for Application {
-  async fn login_with_name_password(&self, owner: Owner, name: OperatorName, password: OperatorPassword) -> Result<SessionEntity> {
+  async fn login_with_name_password(&self, name: OperatorName, password: OperatorPassword) -> Result<SessionEntity> {
     let operator = self.store.get_operator_by_name(&name).await?;
     let _ = self.service.verify_operator_availability(&operator)?;
     // verify password
@@ -33,7 +32,8 @@ impl ApplicationSessionAdmin for Application {
       return Err(e);
     }
     // delete all existed session
-    let _ = self.store.delete_session(&owner, operator.ref_id()).await?;
+    let owner = operator.ref_owner();
+    let _ = self.store.delete_session(owner, operator.ref_id()).await?;
     // create new session
     let session = self.service.create_session_entity(&operator)?;
     // insert new session

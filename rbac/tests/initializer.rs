@@ -1,5 +1,4 @@
 use {anyhow::Result,
-     crcnt_ddd::value::Owner,
      crcnt_rbac::includes::{OperatorName,
                             OperatorPassword,
                             RBACApplication,
@@ -28,15 +27,14 @@ pub fn init() -> RBACApplication {
 }
 
 pub async fn login(app: &RBACApplication) -> Result<SessionEntity> {
-  let owner = Owner::new("SYS");
   let name = OperatorName::new("ROOT");
   let password = OperatorPassword::new("passw0rd!");
 
-  let session = app.login_with_name_password(owner, name, password).await?;
+  let session = app.login_with_name_password(name, password).await?;
   Ok(session)
 }
 
-pub async fn login_with(app: &RBACApplication, owner: Owner, name: OperatorName, password: OperatorPassword) -> Result<SessionEntity> {
-  let session = app.login_with_name_password(owner, name, password).await?;
+pub async fn login_with(app: &RBACApplication, name: OperatorName, password: OperatorPassword) -> Result<SessionEntity> {
+  let session = app.login_with_name_password(name, password).await?;
   Ok(session)
 }
