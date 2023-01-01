@@ -1,5 +1,4 @@
 use {crate::{application::Application,
-             error::Result,
              operator::{OperatorEntity,
                         OperatorName,
                         OperatorNameType,
@@ -11,6 +10,7 @@ use {crate::{application::Application,
                      StoreDelete,
                      StoreQuery,
                      StoreUpdate}},
+     anyhow::Result,
      async_trait::async_trait,
      tracing::debug};
 

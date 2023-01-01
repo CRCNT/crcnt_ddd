@@ -1,5 +1,4 @@
 use {crate::{application::Application,
-             error::Result,
              feature::FeatureEntity,
              operator::{OperatorName,
                         OperatorPassword},
@@ -11,6 +10,7 @@ use {crate::{application::Application,
                      StoreDelete,
                      StoreQuery,
                      StoreUpdate}},
+     anyhow::Result,
      async_trait::async_trait};
 
 #[async_trait]
@@ -26,11 +26,12 @@ impl ApplicationSessionAdmin for Application {
     let operator = self.store.get_operator_by_name(&name).await?;
     let _ = self.service.verify_operator_availability(&operator)?;
     // verify password
-    if let Err(e) = self.service.verify_operator_password(&operator, &password) {
-      let operator = self.service.increase_operator_failed_times(operator);
+    let verify_result = self.service.verify_operator_password(&operator, &password);
+    if verify_result.is_err() {
+      let operator = self.service.increase_operator_failed_times(operator.clone());
       let _ = self.store.update_operator_entity(&operator).await?;
-      return Err(e);
     }
+    let _ = verify_result?;
     // delete all existed session
     let owner = operator.ref_owner();
     let _ = self.store.delete_session(owner, operator.ref_id()).await?;

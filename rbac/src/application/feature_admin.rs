@@ -1,5 +1,4 @@
 use {crate::{application::Application,
-             error::Result,
              feature::{FeatureCode,
                        FeatureDescription,
                        FeatureEndpoint,
@@ -12,6 +11,7 @@ use {crate::{application::Application,
              session::SessionId,
              store::{StoreCreate,
                      StoreQuery}},
+     anyhow::Result,
      async_trait::async_trait};
 
 #[async_trait]
