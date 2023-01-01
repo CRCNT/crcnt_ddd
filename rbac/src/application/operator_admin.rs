@@ -17,7 +17,7 @@ use {crate::{application::Application,
 
 #[async_trait]
 pub trait ApplicationOperatorAdmin {
-  async fn create_admin_operator(&self, owner: Owner, name: OperatorName, password: OperatorPassword) -> Result<OperatorEntity>;
+  async fn create_admin_operator(&self, owner: Owner, name: OperatorName, password: Option<OperatorPassword>) -> Result<OperatorEntity>;
   async fn create_operator_with_login_name(&self, session_id: &SessionId, name: OperatorName) -> Result<OperatorEntity>;
   async fn change_password(&self, session_id: &SessionId, old_password: OperatorPassword, new_password: OperatorPassword) -> Result<()>;
 }
