@@ -45,6 +45,7 @@ pub mod includes {
                                 ApplicationRoleAdmin as RBACApplicationRoleAdmin,
                                 ApplicationSessionAdmin as RBACApplicationSessionAdmin,
                                 Config as RBACConfig},
+                  error::Error,
                   feature::{FeatureCode,
                             FeatureDescription,
                             FeatureEndpoint,
