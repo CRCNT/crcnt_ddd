@@ -51,4 +51,7 @@ pub enum Error {
 
   #[error("Feature Code Duplicated")]
   FeatureCodeDuplicated,
+
+  #[error("Feature Access Not Authorized")]
+  FeatureAccessNotAuthorized,
 }

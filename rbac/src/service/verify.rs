@@ -1,4 +1,5 @@
-use {crate::{error::{Error::{NewPasswordSameWithOldPassword,
+use {crate::{error::{Error::{FeatureAccessNotAuthorized,
+                             NewPasswordSameWithOldPassword,
                              OperatorDeleted,
                              OperatorInactive,
                              OperatorNeedChangePassword,
@@ -7,6 +8,8 @@ use {crate::{error::{Error::{NewPasswordSameWithOldPassword,
                              PasswordTooWeak,
                              SessionExpired},
                      Result},
+             feature::{FeatureCode,
+                       FeatureEntity},
              includes::{OperatorPassword,
                         OperatorStatus},
              operator::OperatorEntity,
@@ -23,6 +26,7 @@ pub trait ServiceVerify {
   fn verify_normal_session_availability(&self, session: &SessionEntity) -> Result<()>;
   fn verify_session_availability_ignore_type(&self, session: &SessionEntity) -> Result<()>;
   fn verify_updating_password(&self, old_password: &OperatorPassword, new_password: &OperatorPassword) -> Result<()>;
+  fn can_access_feature(&self, features: &Vec<FeatureEntity>, feature_code: &FeatureCode) -> Result<()>;
 }
 
 impl ServiceVerify for Service {
@@ -83,5 +87,13 @@ impl ServiceVerify for Service {
     }
 
     Ok(())
+  }
+
+  fn can_access_feature(&self, features: &Vec<FeatureEntity>, feature_code: &FeatureCode) -> Result<()> {
+    if let Some(_) = features.iter().find(|x| x.mv_code().inner().eq(feature_code.inner())) {
+      Ok(())
+    } else {
+      Err(FeatureAccessNotAuthorized)
+    }
   }
 }

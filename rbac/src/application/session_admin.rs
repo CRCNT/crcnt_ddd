@@ -1,5 +1,6 @@
 use {crate::{application::Application,
-             feature::FeatureEntity,
+             feature::{FeatureCode,
+                       FeatureEntity},
              operator::{OperatorName,
                         OperatorPassword},
              service::{ServiceFactory,
@@ -16,7 +17,7 @@ use {crate::{application::Application,
 #[async_trait]
 pub trait ApplicationSessionAdmin {
   async fn login_with_name_password(&self, name: OperatorName, password: OperatorPassword) -> Result<SessionEntity>;
-  async fn hit_session(&self, session_id: &SessionId) -> Result<SessionEntity>;
+  async fn hit_session(&self, session_id: &SessionId, feature_code: FeatureCode) -> Result<SessionEntity>;
   async fn fetch_session_features(&self, session_id: &SessionId) -> Result<Vec<FeatureEntity>>;
 }
 
@@ -42,9 +43,14 @@ impl ApplicationSessionAdmin for Application {
     Ok(session)
   }
 
-  async fn hit_session(&self, session_id: &SessionId) -> Result<SessionEntity> {
+  async fn hit_session(&self, session_id: &SessionId, feature_code: FeatureCode) -> Result<SessionEntity> {
     let session = self.store.get_session(session_id).await?;
     let _ = self.service.verify_normal_session_availability(&session)?;
+
+    // check if the session has privileges to access the feature
+    let features = self.fetch_session_features(session_id).await?;
+    let _ = self.service.can_access_feature(&features, &feature_code)?;
+
     let session = self.service.hit_session_entity(session)?;
     let _ = self.store.update_session_entity(&session).await?;
     Ok(session)
