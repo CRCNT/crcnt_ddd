@@ -24,7 +24,7 @@ pub trait ApplicationOperatorAdmin {
 
 #[async_trait]
 impl ApplicationOperatorAdmin for Application {
-  async fn create_admin_operator(&self, owner: Owner, name: OperatorName, password: OperatorPassword) -> Result<OperatorEntity> {
+  async fn create_admin_operator(&self, owner: Owner, name: OperatorName, password: Option<OperatorPassword>) -> Result<OperatorEntity> {
     let _ = self.store.check_operator_duplicated(&name).await?;
     // create the entity
     let entity = self.service.create_admin_operator_entity(owner, name, password)?;

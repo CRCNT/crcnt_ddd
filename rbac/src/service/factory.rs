@@ -35,7 +35,7 @@ use {crate::{error::Result,
                         UtcDateTime}};
 
 pub trait ServiceFactory {
-  fn create_admin_operator_entity(&self, owner: Owner, name: OperatorName, password: OperatorPassword) -> Result<OperatorEntity>;
+  fn create_admin_operator_entity(&self, owner: Owner, name: OperatorName, password: Option<OperatorPassword>) -> Result<OperatorEntity>;
   fn create_operator_entity(&self, session: &SessionEntity, name: OperatorName, name_type: OperatorNameType) -> Result<OperatorEntity>;
   fn create_session_entity(&self, operator: &OperatorEntity) -> Result<SessionEntity>;
   fn create_feature_entity(&self,
@@ -64,14 +64,19 @@ pub trait ServiceFactory {
 }
 
 impl ServiceFactory for Service {
-  fn create_admin_operator_entity(&self, owner: Owner, name: OperatorName, password: OperatorPassword) -> Result<OperatorEntity> {
+  fn create_admin_operator_entity(&self, owner: Owner, name: OperatorName, password: Option<OperatorPassword>) -> Result<OperatorEntity> {
     let creator: Creator = owner.inner().into();
+    let (password, status) = if let Some(password) = password {
+      (password, OperatorStatus::Active)
+    } else {
+      (OperatorPassword::change_me(), OperatorStatus::NeedChangePwd)
+    };
     let password = self.sha256_hash_password(&self.password_salt, password)?;
     Ok(OperatorEntity::builder().owner(owner)
                                 .name(name)
                                 .name_type(OperatorNameType::LoginName)
                                 .password(password)
-                                .status(OperatorStatus::Active)
+                                .status(status)
                                 .create_at(CreateAt::now())
                                 .update_at(UpdateAt::now())
                                 .deleted(false.into())
