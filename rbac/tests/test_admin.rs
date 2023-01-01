@@ -1,6 +1,7 @@
 use {crate::initializer::{login,
                           login_with},
      anyhow::Result,
+     crcnt_ddd::value::Owner,
      crcnt_rbac::includes::{FeatureCode,
                             FeatureDescription,
                             FeatureId,
@@ -24,11 +25,17 @@ mod initializer;
 #[tokio::test]
 async fn test_add_operator() -> Result<()> {
   let app = initializer::init();
-  let session = login(&app).await?;
-  let name = OperatorName::new("admin");
-  let operator = app.create_operator_with_login_name(session.ref_id(), name).await?;
-  info!("{:?}", operator);
+  // let session = login(&app).await?;
+  // let name = OperatorName::new("admin");
+  // let operator = app.create_operator_with_login_name(session.ref_id(), name).await?;
+  // info!("{:?}", operator);
 
+  // create admin operator
+  let operator = app.create_admin_operator(Owner::new("TestOwner"),
+                                           OperatorName::new("TestOwnerAdmin"),
+                                           OperatorPassword::new("Easy"))
+                    .await?;
+  info!("{:?}", operator);
   Ok(())
 }
 

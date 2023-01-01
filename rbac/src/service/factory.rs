@@ -35,6 +35,7 @@ use {crate::{error::Result,
                         UtcDateTime}};
 
 pub trait ServiceFactory {
+  fn create_admin_operator_entity(&self, owner: Owner, name: OperatorName, password: OperatorPassword) -> Result<OperatorEntity>;
   fn create_operator_entity(&self, session: &SessionEntity, name: OperatorName, name_type: OperatorNameType) -> Result<OperatorEntity>;
   fn create_session_entity(&self, operator: &OperatorEntity) -> Result<SessionEntity>;
   fn create_feature_entity(&self,
@@ -63,6 +64,26 @@ pub trait ServiceFactory {
 }
 
 impl ServiceFactory for Service {
+  fn create_admin_operator_entity(&self, owner: Owner, name: OperatorName, password: OperatorPassword) -> Result<OperatorEntity> {
+    let creator: Creator = owner.inner().into();
+    let password = self.sha256_hash_password(&self.password_salt, password)?;
+    Ok(OperatorEntity::builder().owner(owner)
+                                .name(name)
+                                .name_type(OperatorNameType::LoginName)
+                                .password(password)
+                                .status(OperatorStatus::Active)
+                                .create_at(CreateAt::now())
+                                .update_at(UpdateAt::now())
+                                .deleted(false.into())
+                                .id(EntityId::new_with_prefix("OPA").into())
+                                .profile_id(None)
+                                .last_login_at(None)
+                                .creator(creator.inner().into())
+                                .updater(creator.inner().into())
+                                .failed_times(0u8.into())
+                                .build())
+  }
+
   fn create_operator_entity(&self, session: &SessionEntity, name: OperatorName, name_type: OperatorNameType) -> Result<OperatorEntity> {
     let owner: Owner = session.as_owner();
     let creator: Creator = session.as_creator();
