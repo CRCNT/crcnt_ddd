@@ -6,7 +6,7 @@ homepage = "https://github.com/CRCNT/crcnt_ddd/tree/main/ddd"
 documentation = "https://github.com/CRCNT/crcnt_ddd/tree/main/ddd"
 repository = "https://github.com/CRCNT/crcnt_ddd/tree/main/ddd"
 readme = "README.md"
-version = "0.2.5"
+version = "0.2.6"
 edition = "2021"
 
 [lib]
