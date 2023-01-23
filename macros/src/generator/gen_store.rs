@@ -15,6 +15,7 @@ pub fn generate_store(derive_input: &DeriveInput) -> TokenStream {
   let method_indent = &meta.method_ident;
 
   let stmt_select_ident = format_ident!("stmt_select_{}", meta.entity_ident.to_string().to_case(Case::Snake));
+  let stmt_count_ident = format_ident!("stmt_count_{}", meta.entity_ident.to_string().to_case(Case::Snake));
   let stmt_get_ident = format_ident!("stmt_get_{}", meta.entity_ident.to_string().to_case(Case::Snake));
   let stmt_insert_ident = format_ident!("stmt_insert_{}", meta.entity_ident.to_string().to_case(Case::Snake));
   let stmt_update_ident = format_ident!("stmt_update_{}", meta.entity_ident.to_string().to_case(Case::Snake));
@@ -36,6 +37,7 @@ pub fn generate_store(derive_input: &DeriveInput) -> TokenStream {
   let update_sets = update_sets.join(", ");
 
   let select_sql = format!("SELECT {} FROM {}", select_fields, table_name);
+  let count_sql = format!("SELECT count(1) FROM {}", table_name);
   let get_sql = format!("SELECT {} FROM {} WHERE id = :id", select_fields, table_name);
   let insert_sql = format!("INSERT INTO {} ({}) VALUES ({})", table_name, select_fields, params_fields);
   let update_sql = format!("UPDATE {} SET {}", table_name, update_sets);
@@ -79,6 +81,7 @@ pub fn generate_store(derive_input: &DeriveInput) -> TokenStream {
 
   let insert_fn_name = format_ident!("exec_insert_{}", meta.entity_ident.to_string().to_case(Case::Snake));
   let select_fn_name = format_ident!("exec_select_where_{}", meta.entity_ident.to_string().to_case(Case::Snake));
+  let count_fn_name = format_ident!("exec_count_where_{}", meta.entity_ident.to_string().to_case(Case::Snake));
   let get_fn_name = format_ident!("exec_get_{}", meta.entity_ident.to_string().to_case(Case::Snake));
   let update_fn_name = format_ident!("exec_update_{}", meta.entity_ident.to_string().to_case(Case::Snake));
   let delete_where_fn_name = format_ident!("exec_delete_where_{}", meta.entity_ident.to_string().to_case(Case::Snake));
@@ -174,6 +177,9 @@ pub fn generate_store(derive_input: &DeriveInput) -> TokenStream {
       fn #stmt_select_ident(&self) -> &'static str {
         #select_sql
       }
+      fn #stmt_count_ident(&self) -> &'static str {
+        #count_sql
+      }
       fn #stmt_get_ident(&self) -> &'static str {
         #get_sql
       }
@@ -222,6 +228,19 @@ pub fn generate_store(derive_input: &DeriveInput) -> TokenStream {
         let sql = format!("{} {}", sql, condition);
         #extract_params_tokens_stream
         sql.with(params).fetch(conn).await
+      }
+
+      async fn #count_fn_name<'a, 't: 'a, C, S>(&self, condition: S, params: mysql_async::prelude::params::Params, conn: C) -> mysql_async::Result<u64>
+      where  C: mysql_async::prelude::ToConnection<'a, 't> + 'a,
+             S: Into<String> + Send,
+      {
+        use mysql_async::prelude::{Query, WithParams};
+        let sql = self.#stmt_count_ident();
+        let condition: String = condition.into();
+        let sql = format!("{} {}", sql, condition);
+        #extract_params_tokens_stream
+        let xs: Vec<u64> = sql.with(params).fetch(conn).await?;
+        Ok(xs.first().map(|x|x.clone()).unwrap_or(0u64))
       }
 
       async fn #delete_where_fn_name<'a, 't: 'a, C, S>(&self, condition: S, params: mysql_async::prelude::params::Params, conn: C) -> mysql_async::Result<()>
