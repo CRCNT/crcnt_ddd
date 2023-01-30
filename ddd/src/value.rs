@@ -57,11 +57,7 @@ impl AvailableSince {
 
   pub fn timestamp_millis(&self) -> i64 { *&self.0.0.timestamp_millis() }
 
-  pub fn from_rfc3399(s: &str) -> Result<Self, String> {
-    let date_time = DateTime::parse_from_rfc3339(s).map_err(|e| format!("AvailableSince parse error: {}", e.to_string()))?;
-    let expired = date_time.with_timezone(&Utc);
-    Ok(AvailableSince(UtcDateTime(expired)))
-  }
+  pub fn from_rfc3399<S: AsRef<str>>(s: S) -> Result<Self, String> { Ok(AvailableSince(UtcDateTime::from_rfc3339(s)?)) }
 
   pub fn is_available_now(&self) -> bool {
     let now = Utc::now();
@@ -84,11 +80,7 @@ impl ExpiredSince {
 
   pub fn timestamp_millis(&self) -> i64 { *&self.0.0.timestamp_millis() }
 
-  pub fn from_rfc3399(s: &str) -> Result<Self, String> {
-    let date_time = DateTime::parse_from_rfc3339(s).map_err(|e| format!("ExpiredSince parse error: {}", e.to_string()))?;
-    let expired = date_time.with_timezone(&Utc);
-    Ok(ExpiredSince(UtcDateTime(expired)))
-  }
+  pub fn from_rfc3399<S: AsRef<str>>(s: S) -> Result<Self, String> { Ok(ExpiredSince(UtcDateTime::from_rfc3339(s)?)) }
 
   pub fn is_expired_now(&self) -> bool {
     let now = Utc::now();
@@ -127,6 +119,12 @@ pub struct UtcDateTime(DateTime<Utc>);
 
 impl UtcDateTime {
   pub fn now() -> Self { UtcDateTime(Utc::now()) }
+
+  pub fn from_rfc3339<S: AsRef<str>>(s: S) -> Result<Self, String> {
+    let date_time = DateTime::parse_from_rfc3339(s.as_ref()).map_err(|e| format!("AvailableSince parse error: {}", e.to_string()))?;
+    let date_time = date_time.with_timezone(&Utc);
+    Ok(Self(date_time))
+  }
 
   pub fn timestamp(&self) -> i64 { *&self.0.timestamp() }
 
