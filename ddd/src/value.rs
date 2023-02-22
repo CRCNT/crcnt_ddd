@@ -134,6 +134,40 @@ impl UtcDateTime {
 }
 //</editor-fold>
 
+#[derive(Debug, Clone)]
+pub struct Amount(f64);
+impl From<f64> for Amount {
+  fn from(value: f64) -> Self { Amount((value * 100.00).round() / 100.00) }
+}
+impl Amount {
+  pub fn new<T: Into<f64>>(v: T) -> Self {
+    let x: f64 = v.into();
+    From::from(x)
+  }
+
+  pub fn inner(&self) -> &f64 { &self.0 }
+
+  pub fn into_inner(self) -> f64 { self.0 }
+}
+
+#[derive(Debug)]
+pub struct F64Ir {
+  v: f64,
+}
+impl ConvIr<Amount> for F64Ir {
+  fn new(v: Value) -> Result<Self, FromValueError> {
+    let v = f64::from_value_opt(v)?;
+    Ok(Self { v })
+  }
+
+  fn commit(self) -> Amount { Amount(self.v) }
+
+  fn rollback(self) -> Value { Value::from(self.v) }
+}
+impl FromValue for Amount {
+  type Intermediate = F64Ir;
+}
+
 //<editor-fold desc="ConvIr<T> for TimestampIr">
 #[derive(Debug)]
 pub struct TimestampIr {
@@ -362,4 +396,15 @@ impl PartialEq for UtcDateTime {
 }
 impl PartialOrd for UtcDateTime {
   fn partial_cmp(&self, other: &Self) -> Option<Ordering> { (&self.0).partial_cmp(&other.0) }
+}
+
+#[cfg(test)]
+mod test {
+  use crate::value::Amount;
+
+  #[test]
+  fn test_amount() {
+    let amt = Amount::new(0.64523);
+    println!("amt = {:?}", amt);
+  }
 }
