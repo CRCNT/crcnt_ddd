@@ -149,7 +149,9 @@ impl Amount {
 
   pub fn into_inner(self) -> f64 { self.0 }
 }
-
+impl From<Amount> for Value {
+  fn from(value: Amount) -> Self { Value::from(value.0) }
+}
 #[derive(Debug)]
 pub struct F64Ir {
   v: f64,
