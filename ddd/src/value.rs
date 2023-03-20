@@ -136,10 +136,14 @@ impl UtcDateTime {
     }
   }
 
-  pub fn from_timestamp_millis(timestamp: i64) -> Self {
+  pub fn from_timestamp_millis(timestamp: i64) -> Option<Self> {
     let naive = NaiveDateTime::from_timestamp_millis(timestamp);
-    let date_time = DateTime::<Utc>::from_utc(naive, Utc);
-    Self(date_time)
+    if let Some(naive) = naive {
+      let date_time = DateTime::<Utc>::from_utc(naive, Utc);
+      Some(Self(date_time))
+    } else {
+      None
+    }
   }
 
   pub fn timestamp(&self) -> i64 { *&self.0.timestamp() }
