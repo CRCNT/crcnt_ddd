@@ -80,12 +80,19 @@ pub fn generate_store(derive_input: &DeriveInput) -> TokenStream {
         .collect::<Vec<_>>();
 
   let insert_fn_name = format_ident!("exec_insert_{}", meta.entity_ident.to_string().to_case(Case::Snake));
+  let insert_fn_name_with_txn = format_ident!("exec_insert_{}_with_txn", meta.entity_ident.to_string().to_case(Case::Snake));
   let select_fn_name = format_ident!("exec_select_where_{}", meta.entity_ident.to_string().to_case(Case::Snake));
+  let select_fn_name_with_txn = format_ident!("exec_select_where_{}_with_txn", meta.entity_ident.to_string().to_case(Case::Snake));
   let count_fn_name = format_ident!("exec_count_where_{}", meta.entity_ident.to_string().to_case(Case::Snake));
+  let count_fn_name_with_txn = format_ident!("exec_count_where_{}_with_txn", meta.entity_ident.to_string().to_case(Case::Snake));
   let get_fn_name = format_ident!("exec_get_{}", meta.entity_ident.to_string().to_case(Case::Snake));
+  let get_fn_name_with_txn = format_ident!("exec_get_{}_with_txn", meta.entity_ident.to_string().to_case(Case::Snake));
   let update_fn_name = format_ident!("exec_update_{}", meta.entity_ident.to_string().to_case(Case::Snake));
+  let update_fn_name_with_txn = format_ident!("exec_update_{}_with_txn", meta.entity_ident.to_string().to_case(Case::Snake));
   let delete_where_fn_name = format_ident!("exec_delete_where_{}", meta.entity_ident.to_string().to_case(Case::Snake));
+  let delete_where_fn_name_with_txn = format_ident!("exec_delete_where_{}_with_txn", meta.entity_ident.to_string().to_case(Case::Snake));
   let delete_by_id_fn_name = format_ident!("exec_delete_by_id_{}", meta.entity_ident.to_string().to_case(Case::Snake));
+  let delete_by_id_fn_name_with_txn = format_ident!("exec_delete_by_id_{}_with_txn", meta.entity_ident.to_string().to_case(Case::Snake));
 
   let field_id = meta.entity_meta
                      .fields
@@ -217,6 +224,16 @@ pub fn generate_store(derive_input: &DeriveInput) -> TokenStream {
         #extract_params_tokens_stream
         sql.with(params).ignore(conn).await
       }
+
+      async fn #insert_fn_name_with_txn(&self, entity: &#entity_name_ident, txn: &mut mysql_async::Transaction<'_>) -> mysql_async::Result<()>
+      {
+        use mysql_async::prelude::{Query, WithParams};
+        let sql = self.#stmt_insert_ident();
+        let params = self.#entity_params_fn_name(entity);
+        #extract_params_tokens_stream
+        sql.with(params).ignore(txn).await
+      }
+
       async fn #select_fn_name<'a, 't: 'a, C, S, T>(&self, condition: S, params: mysql_async::prelude::params::Params, conn: C) -> mysql_async::Result<Vec<T>>
       where  C: mysql_async::prelude::ToConnection<'a, 't> + 'a,
              S: Into<String> + Send,
@@ -228,6 +245,19 @@ pub fn generate_store(derive_input: &DeriveInput) -> TokenStream {
         let sql = format!("{} {}", sql, condition);
         #extract_params_tokens_stream
         sql.with(params).fetch(conn).await
+      }
+
+      async fn #select_fn_name_with_txn<S, T>(&self, condition: S, params: mysql_async::prelude::params::Params, txn: &mut mysql_async::Transaction<'_>) -> mysql_async::Result<Vec<T>>
+      where
+             S: Into<String> + Send,
+             T: mysql_async::prelude::FromRow + Send + 'static,
+      {
+        use mysql_async::prelude::{Query, WithParams};
+        let sql = self.#stmt_select_ident();
+        let condition: String = condition.into();
+        let sql = format!("{} {}", sql, condition);
+        #extract_params_tokens_stream
+        sql.with(params).fetch(txn).await
       }
 
       async fn #count_fn_name<'a, 't: 'a, C, S>(&self, condition: S, params: mysql_async::prelude::params::Params, conn: C) -> mysql_async::Result<u64>
@@ -243,6 +273,19 @@ pub fn generate_store(derive_input: &DeriveInput) -> TokenStream {
         Ok(xs.first().map(|x|x.clone()).unwrap_or(0u64))
       }
 
+      async fn #count_fn_name_with_txn<S>(&self, condition: S, params: mysql_async::prelude::params::Params, txn: &mut mysql_async::Transaction<'_>) -> mysql_async::Result<u64>
+      where
+             S: Into<String> + Send,
+      {
+        use mysql_async::prelude::{Query, WithParams};
+        let sql = self.#stmt_count_ident();
+        let condition: String = condition.into();
+        let sql = format!("{} {}", sql, condition);
+        #extract_params_tokens_stream
+        let xs: Vec<u64> = sql.with(params).fetch(txn).await?;
+        Ok(xs.first().map(|x|x.clone()).unwrap_or(0u64))
+      }
+
       async fn #delete_where_fn_name<'a, 't: 'a, C, S>(&self, condition: S, params: mysql_async::prelude::params::Params, conn: C) -> mysql_async::Result<()>
       where  C: mysql_async::prelude::ToConnection<'a, 't> + 'a,
              S: Into<String> + Send,
@@ -255,6 +298,17 @@ pub fn generate_store(derive_input: &DeriveInput) -> TokenStream {
         sql.with(params).ignore(conn).await
       }
 
+      async fn #delete_where_fn_name_with_txn<S>(&self, condition: S, params: mysql_async::prelude::params::Params, txn: &mut mysql_async::Transaction<'_>) -> mysql_async::Result<()>
+      where  S: Into<String> + Send,
+      {
+        use mysql_async::prelude::{Query, WithParams};
+        let sql = self.#stmt_delete_ident();
+        let condition: String = condition.into();
+        let sql = format!("{} {}", sql, condition);
+        #extract_params_tokens_stream
+        sql.with(params).ignore(txn).await
+      }
+
       async fn #delete_by_id_fn_name<'a, 't: 'a, C>(&self, id: &#entity_id_ident, conn: C) -> mysql_async::Result<()>
       where  C: mysql_async::prelude::ToConnection<'a, 't> + 'a,
       {
@@ -263,6 +317,15 @@ pub fn generate_store(derive_input: &DeriveInput) -> TokenStream {
         let params = params! {"id" => id.inner()};
         #extract_params_tokens_stream
         sql.with(params).ignore(conn).await
+      }
+
+      async fn #delete_by_id_fn_name_with_txn(&self, id: &#entity_id_ident, txn: &mut mysql_async::Transaction<'_>) -> mysql_async::Result<()>
+      {
+        use mysql_async::prelude::{Query, WithParams, params};
+        let sql = self.#stmt_delete_by_id_ident();
+        let params = params! {"id" => id.inner()};
+        #extract_params_tokens_stream
+        sql.with(params).ignore(txn).await
       }
 
       async fn #get_fn_name<'a, 't: 'a, C, T>(&self, id: &#entity_id_ident, conn: C) -> mysql_async::Result<Option<T>>
@@ -277,6 +340,17 @@ pub fn generate_store(derive_input: &DeriveInput) -> TokenStream {
         sql.with(params).first(conn).await
       }
 
+      async fn #get_fn_name_with_txn<T>(&self, id: &#entity_id_ident, txn: &mut mysql_async::Transaction<'_>) -> mysql_async::Result<Option<T>>
+      where  T: mysql_async::prelude::FromRow + Send + 'static,
+      {
+        use mysql_async::prelude::{Query, WithParams, params};
+        let sql = self.#stmt_select_ident();
+        let sql = format!("{} WHERE id = :id", sql);
+        let params = params! {"id" => id.inner()};
+        #extract_params_tokens_stream
+        sql.with(params).first(txn).await
+      }
+
       async fn #update_fn_name<'a, 't: 'a, C>(&self, entity: &#entity_name_ident, conn: C) -> mysql_async::Result<()>
       where C: mysql_async::prelude::ToConnection<'a, 't> + 'a
       {
@@ -285,6 +359,15 @@ pub fn generate_store(derive_input: &DeriveInput) -> TokenStream {
         let params = self.#entity_params_fn_name(entity);
         #extract_params_tokens_stream
         sql.with(params).ignore(conn).await
+      }
+
+      async fn #update_fn_name_with_txn(&self, entity: &#entity_name_ident, txn: &mut mysql_async::Transaction<'_>) -> mysql_async::Result<()>
+      {
+        use mysql_async::prelude::{Query, WithParams};
+        let sql = self.#stmt_update_by_id_ident();
+        let params = self.#entity_params_fn_name(entity);
+        #extract_params_tokens_stream
+        sql.with(params).ignore(txn).await
       }
     }
 
