@@ -106,7 +106,8 @@ pub struct Owner(String);
 #[derive(Debug, Clone, Domain)]
 #[domain_commands(value)]
 pub struct EntityId(String);
-
+#[derive(Debug)]
+pub struct EntityIdIr(pub EntityId);
 /// Updater
 #[derive(Debug, Clone, Domain)]
 #[domain_commands(value)]
