@@ -157,6 +157,24 @@ impl UtcDateTime {
 
 #[derive(Debug, Clone)]
 pub struct Amount(f64);
+impl PartialEq for Amount {
+  fn eq(&self, other: &Self) -> bool { (self.0 * 100.00) as u64 == (other.0 * 100.00) as u64 }
+}
+impl Ord for Amount {
+  fn cmp(&self, other: &Self) -> Ordering {
+    let a = (self.0 * 100.00) as u64;
+    let b = (other.0 * 100.00) as u64;
+    a.cmp(&b)
+  }
+}
+impl PartialOrd for Amount {
+  fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+    let a = (self.0 * 100.00) as u64;
+    let b = (other.0 * 100.00) as u64;
+    a.partial_cmp(&b)
+  }
+}
+impl Eq for Amount {}
 impl From<f64> for Amount {
   fn from(value: f64) -> Self { Amount((value * 100.00).round() / 100.00) }
 }
@@ -428,6 +446,10 @@ mod test {
   #[test]
   fn test_amount() {
     let amt = Amount::new(0.64523);
+    let amt2 = Amount::new(0.6463);
+    let amt3 = Amount::new(0.6563);
     println!("amt = {:?}", amt);
+    println!("{}", amt == amt2);
+    println!("{}", amt < amt3);
   }
 }
