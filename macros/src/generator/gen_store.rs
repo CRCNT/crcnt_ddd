@@ -89,6 +89,7 @@ pub fn generate_store(derive_input: &DeriveInput) -> TokenStream {
   let get_fn_name_with_txn = format_ident!("exec_get_{}_with_txn", meta.entity_ident.to_string().to_case(Case::Snake));
   let update_fn_name = format_ident!("exec_update_{}", meta.entity_ident.to_string().to_case(Case::Snake));
   let update_fn_name_with_txn = format_ident!("exec_update_{}_with_txn", meta.entity_ident.to_string().to_case(Case::Snake));
+  let update_fn_name_where_with_txn = format_ident!("exec_update_{}_extra_where_with_txn", meta.entity_ident.to_string().to_case(Case::Snake));
   let delete_where_fn_name = format_ident!("exec_delete_where_{}", meta.entity_ident.to_string().to_case(Case::Snake));
   let delete_where_fn_name_with_txn = format_ident!("exec_delete_where_{}_with_txn", meta.entity_ident.to_string().to_case(Case::Snake));
   let delete_by_id_fn_name = format_ident!("exec_delete_by_id_{}", meta.entity_ident.to_string().to_case(Case::Snake));
@@ -366,6 +367,27 @@ pub fn generate_store(derive_input: &DeriveInput) -> TokenStream {
         use mysql_async::prelude::{Query, WithParams};
         let sql = self.#stmt_update_by_id_ident();
         let params = self.#entity_params_fn_name(entity);
+        #extract_params_tokens_stream
+        sql.with(params).ignore(txn).await
+      }
+
+      async fn #update_fn_name_where_with_txn<S>(&self, entity: &#entity_name_ident, condition: S, params2: mysql_async::prelude::params::Params, txn: &mut mysql_async::Transaction<'_>) -> mysql_async::Result<()>
+      where S: Into<String> + Send
+      {
+        use mysql_async::prelude::{Query, WithParams};
+        let sql = self.#stmt_update_ident();
+        let condition: String = condition.into();
+        let sql = format!("{} {}", sql, condition);
+        let params1 = self.#entity_params_fn_name(entity);
+        let params = match (params1, params2) {
+          (mysql_async::prelude::params::Params::Named(xs1), mysql_async::prelude::params::Params::Named(xs2)) => {
+            let mut xs3 = std::collections::HashMap::new();
+            xs3.extend(xs1);
+            xs3.extend(xs2);
+            mysql_async::prelude::params::Params::Named(xs3)
+          },
+          (_, _) => panic!("MUST BE TWO NAMED PARAMS"),
+        };
         #extract_params_tokens_stream
         sql.with(params).ignore(txn).await
       }
