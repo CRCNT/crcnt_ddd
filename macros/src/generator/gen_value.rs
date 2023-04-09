@@ -123,8 +123,8 @@ pub fn generate_value_token_stream(derive_input: &DeriveInput) -> TokenStream {
   // into mysql value, From<&T> for Value
   let into_mysql_value = if impls.iter().find(|x| x.eq(&&ValueImpl::IntoMysqlValue)).is_some() {
     quote! {
-      impl From<&#ident> for mysql_common::value::Value {
-        fn from(x: &#ident) -> Self {
+      impl From<#ident> for mysql_common::value::Value {
+        fn from(x: #ident) -> Self {
           mysql_common::value::Value::from(x.inner())
         }
       }
