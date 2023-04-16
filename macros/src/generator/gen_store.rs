@@ -14,6 +14,7 @@ pub fn generate_store(derive_input: &DeriveInput) -> TokenStream {
   let stmt_indent = &meta.stmt_ident;
   let method_indent = &meta.method_ident;
 
+  let stmt_table_name_ident = format_ident!("stmt_table_name");
   let stmt_select_ident = format_ident!("stmt_select_{}", meta.entity_ident.to_string().to_case(Case::Snake));
   let stmt_count_ident = format_ident!("stmt_count_{}", meta.entity_ident.to_string().to_case(Case::Snake));
   let stmt_get_ident = format_ident!("stmt_get_{}", meta.entity_ident.to_string().to_case(Case::Snake));
@@ -182,6 +183,10 @@ pub fn generate_store(derive_input: &DeriveInput) -> TokenStream {
 
   let stmt_token_stream = quote! {
     pub trait #stmt_indent {
+      fn #stmt_table_name_ident(&self) -> &'static str {
+        #table_name
+      }
+
       fn #stmt_select_ident(&self) -> &'static str {
         #select_sql
       }
