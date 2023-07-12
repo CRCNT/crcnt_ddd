@@ -20,6 +20,8 @@ pub struct CreateAt(UtcDateTime);
 impl CreateAt {
   pub fn now() -> Self { Self(UtcDateTime::now()) }
 
+  pub fn from_utd_date_time(v: UtcDateTime) -> Self { Self(v) }
+
   pub fn timestamp(&self) -> i64 { *&self.0.0.timestamp() }
 
   pub fn timestamp_millis(&self) -> i64 { *&self.0.0.timestamp_millis() }
@@ -36,6 +38,8 @@ pub struct UpdateAt(UtcDateTime);
 
 impl UpdateAt {
   pub fn now() -> Self { Self(UtcDateTime::now()) }
+
+  pub fn from_utd_date_time(v: UtcDateTime) -> Self { Self(v) }
 
   pub fn timestamp(&self) -> i64 { *&self.0.0.timestamp() }
 
@@ -120,6 +124,8 @@ pub struct UtcDateTime(DateTime<Utc>);
 
 impl UtcDateTime {
   pub fn now() -> Self { UtcDateTime(Utc::now()) }
+
+  pub fn from_date_time(v: DateTime<Utc>) -> Self { Self(v) }
 
   pub fn from_rfc3339<S: AsRef<str>>(s: S) -> Result<Self, String> {
     let date_time = DateTime::parse_from_rfc3339(s.as_ref()).map_err(|e| format!("AvailableSince parse error: {}", e.to_string()))?;
