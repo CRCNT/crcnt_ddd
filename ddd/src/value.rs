@@ -7,13 +7,15 @@ use {chrono::{DateTime,
                                      FromValue,
                                      FromValueError},
                            Value},
+     serde::{Deserialize,
+             Serialize},
      std::{cmp::Ordering,
            ops},
      ulid::Ulid};
 
 //<editor-fold desc="CreateAt Def">
 /// CreateAt is a timestamp in milliseconds like it in Java
-#[derive(Debug, Clone, Domain)]
+#[derive(Debug, Clone, Domain, Serialize, Deserialize)]
 #[domain_commands(value)]
 pub struct CreateAt(UtcDateTime);
 
@@ -32,7 +34,7 @@ impl CreateAt {
 
 //<editor-fold desc="UpdateAt Def">
 /// UpdateAt is a timestamp in milliseconds like it in Java
-#[derive(Debug, Clone, Domain)]
+#[derive(Debug, Clone, Domain, Serialize, Deserialize)]
 #[domain_commands(value)]
 pub struct UpdateAt(UtcDateTime);
 
@@ -50,7 +52,7 @@ impl UpdateAt {
 //</editor-fold>
 
 //<editor-fold desc="AvailableSince Def">
-#[derive(Debug, Clone, Domain)]
+#[derive(Debug, Clone, Domain, Serialize, Deserialize)]
 #[domain_commands(value)]
 pub struct AvailableSince(UtcDateTime);
 
@@ -73,7 +75,7 @@ impl AvailableSince {
 //</editor-fold>
 
 //<editor-fold desc="ExpiredSince Def">
-#[derive(Debug, Clone, Domain)]
+#[derive(Debug, Clone, Domain, Serialize, Deserialize)]
 #[domain_commands(value)]
 pub struct ExpiredSince(UtcDateTime);
 
@@ -97,29 +99,29 @@ impl ExpiredSince {
 
 //<editor-fold desc="Basic String Value">
 /// Creator
-#[derive(Debug, Clone, Domain)]
+#[derive(Debug, Clone, Domain, Serialize, Deserialize)]
 #[domain_commands(value)]
 pub struct Creator(String);
 
 /// Owner
-#[derive(Debug, Clone, Domain)]
+#[derive(Debug, Clone, Domain, Serialize, Deserialize)]
 #[domain_commands(value)]
 pub struct Owner(String);
 
 /// Owner
-#[derive(Debug, Clone, Domain)]
+#[derive(Debug, Clone, Domain, Serialize, Deserialize)]
 #[domain_commands(value)]
 pub struct EntityId(String);
 #[derive(Debug)]
 pub struct EntityIdIr(pub EntityId);
 /// Updater
-#[derive(Debug, Clone, Domain)]
+#[derive(Debug, Clone, Domain, Serialize, Deserialize)]
 #[domain_commands(value)]
 pub struct Updater(String);
 //</editor-fold>
 
 //<editor-fold desc="UtcDateTime Def">
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct UtcDateTime(DateTime<Utc>);
 
 impl UtcDateTime {
@@ -161,7 +163,7 @@ impl UtcDateTime {
 }
 //</editor-fold>
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Amount(f64);
 impl PartialEq for Amount {
   fn eq(&self, other: &Self) -> bool { (self.0 * 100.00) as u64 == (other.0 * 100.00) as u64 }
@@ -293,7 +295,7 @@ impl ConvIr<ExpiredSince> for TimestampIr {
 
 //<editor-fold desc="Deleted and ConvIr">
 /// Deleted is a logic deletion flag
-#[derive(Debug, Clone, Domain)]
+#[derive(Debug, Clone, Domain, Serialize, Deserialize)]
 #[domain_commands(value)]
 pub struct Deleted(bool);
 
